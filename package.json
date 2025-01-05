@@ -9,17 +9,27 @@
     "clean-db": "rm database.db #remove the old database",
     "build-db-win": "sqlite3 database.db < db_schema.sql",
     "clean-db-win": "del database.db",
-    "start": "node index.js"
+    "start": "node index.js",
+    "build:css": "postcss public/styles.css -o public/build/styles.css",
+    "watch:css": "postcss public/styles.css -o public/build/styles.css --watch",
+    "dev": "nodemon index.js"
   },
-  "author": "Simon Katan",
+  "author": "Yarli Rabelo",
   "license": "ISC",
   "dependencies": {
     "ejs": "^3.1.8",
     "express": "^4.18.2",
     "sqlite3": "^5.1.2"
   },
-  "engines" : { 
-    "npm" : ">=8.0.0",
-    "node" : ">=16.0.0"
+  "engines": {
+    "npm": ">=8.0.0",
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "nodemon": "^3.1.9",
+    "postcss": "^8.4.49",
+    "postcss-cli": "^11.0.0",
+    "tailwindcss": "^3.4.17"
   }
 }

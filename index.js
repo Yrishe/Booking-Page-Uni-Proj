@@ -6,10 +6,15 @@
 // Set up express, bodyparser and EJS
 const express = require('express');
 const app = express();
+const path = require("path");
 const port = 3000;
 var bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs'); // set the app to use ejs for rendering
+
+//Default
+app.use(express.json())
+app.use(express.urlencoded({extended:false}))
 app.use(express.static(__dirname + '/public')); // set location of static files
 
 // Set up SQLite
