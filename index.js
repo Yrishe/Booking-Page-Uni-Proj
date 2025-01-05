@@ -34,6 +34,10 @@ app.get('/', (req, res) => {
 const usersRoutes = require('./routes/users');
 app.use('/users', usersRoutes);
 
+// Add all the route handlers in usersRoutes to the app under the path /users
+const productRoutes = require('./routes/products');
+app.use('/products', productRoutes);
+
 
 // Make the web application listen for HTTP requests
 app.listen(port, () => {
