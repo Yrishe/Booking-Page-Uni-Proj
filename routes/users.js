@@ -14,6 +14,17 @@ const router = express.Router();
 /**
  * @desc Display all the users
  */
+
+router.get("/main", (req, res) => {
+    res.render("main.ejs");
+});
+
+router.get("/admin-settings", (req, res) => {
+    res.render("admin-settings.ejs")
+});
+
+// router.post();
+
 router.get("/list-users", (req, res, next) => {
     // Define the query
     query = "SELECT * FROM users"
@@ -56,6 +67,16 @@ router.post("/add-user", (req, res, next) => {
             }
         }
     );
+});
+
+router.get("/users-login", (req, res) => {
+    res.render("users-login.ejs");
+});
+
+router.post("/users-login", (req, res) => {
+    const { username, password } = req.body;
+// Handle login logic (authentication, validation, etc.)
+    res.redirect("/dashboard");
 });
 
 // Export the router object so index.js can access it

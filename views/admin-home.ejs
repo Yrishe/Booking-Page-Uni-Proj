@@ -3,14 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet"  type="text/css" href="/main.css" />
-    <title>Admin Home</title>
+    <title>Note Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Admin Home</h1>
-    <!-- <form action="add-user" method="post">
-        <p>User: <input id="user" type="text" name="user_name" /></p>
-        <button type="submit">Create a new user record</button>
-    </form> -->
+<body class="bg-gray-100 min-h-screen">
+    <!-- Top Section -->
+    <header class="p-4 flex justify-between items-center bg-gray-200">
+        <div>
+            <div class="text-lg font-bold">BuyTickets.com</div>
+            <div class="text-sm">Organizer Home</div>
+            <div class="text-xs text-gray-500">Author</div>
+        </div>
+        <a href="/views/admin-settings.ejs" class="text-blue-500 font-semibold">Settings</a>
+    </header>
+
+    <!-- Main Content -->
+    <main class="p-8">
+        <!-- Draft Note List -->
+        <section class="mb-8">
+            <h2 class="text-lg font-bold mb-4">Draft Note - List</h2>
+            <table class="table-auto w-full text-left bg-white shadow-md rounded-lg">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="p-2">ID</th>
+                        <th class="p-2">Title</th>
+                        <th class="p-2">Subtitle</th>
+                        <th class="p-2">Created</th>
+                        <th class="p-2">Last Modified</th>
+                        <th class="p-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% draftNotes.forEach(note => { %>
+                        <tr class="border-t">
+                            <td class="p-2"><%= note.id %></td>
+                            <td class="p-2"><%= note.title %></td>
+                            <td class="p-2"><%= note.subtitle %></td>
+                            <td class="p-2"><%= note.created %></td>
+                            <td class="p-2"><%= note.modified %></td>
+                            <td class="p-2 flex space-x-2">
+                                <a href="/edit/<%= note.id %>" class="bg-gray-500 text-white px-3 py-1 rounded">Edit</a>
+                                <button class="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+            <button class="mt-4 bg-gray-500 text-white px-4 py-2 rounded">Publish</button>
+        </section>
+
+        <!-- Published Note List -->
+        <section>
+            <h2 class="text-lg font-bold mb-4">Published Note - List</h2>
+            <table class="table-auto w-full text-left bg-white shadow-md rounded-lg">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="p-2">ID</th>
+                        <th class="p-2">Title</th>
+                        <th class="p-2">Subtitle</th>
+                        <th class="p-2">Created</th>
+                        <th class="p-2">Published</th>
+                        <th class="p-2">Likes</th>
+                        <th class="p-2">Comments</th>
+                        <th class="p-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% publishedNotes.forEach(note => { %>
+                        <tr class="border-t">
+                            <td class="p-2"><%= note.id %></td>
+                            <td class="p-2"><%= note.title %></td>
+                            <td class="p-2"><%= note.subtitle %></td>
+                            <td class="p-2"><%= note.created %></td>
+                            <td class="p-2"><%= note.published %></td>
+                            <td class="p-2"><%= note.likes %></td>
+                            <td class="p-2"><%= note.comments %></td>
+                            <td class="p-2 flex space-x-2">
+                                <button class="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+                                <button class="bg-gray-500 text-white px-3 py-1 rounded">Share</button>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+            <button class="mt-4 bg-gray-500 text-white px-4 py-2 rounded">Refresh</button>
+        </section>
+    </main>
 </body>
 </html>
+
+
