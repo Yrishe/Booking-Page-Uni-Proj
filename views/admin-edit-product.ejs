@@ -1,16 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet"  type="text/css" href="/main.css" />
-    <title>Edit Product</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Ticket Editor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Edit Ticket</h1>
-    <!-- <form action="add-user" method="post">
-        <p>User: <input id="user" type="text" name="user_name" /></p>
-        <button type="submit">Create a new user record</button>
-    </form> -->
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center bg-white shadow p-4">
+    <div>
+      <h1 class="text-lg font-bold">App Name</h1>
+      <p class="text-gray-600">Subtitle</p>
+      <p class="text-gray-400 text-sm">Author</p>
+    </div>
+    <a href="/settings" class="text-blue-500 font-bold hover:underline">Settings</a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow container mx-auto p-6">
+    <!-- Metadata Section -->
+    <div class="space-y-4 mb-6">
+      <div class="flex items-center space-x-4">
+        <p class="bg-gray-200 text-gray-700 px-4 py-2 rounded">Created Date: <%= ticket.createdDate %></p>
+        <p class="bg-gray-200 text-gray-700 px-4 py-2 rounded">Last Modified: <%= ticket.lastModified %></p>
+        <p class="bg-gray-200 text-gray-700 px-4 py-2 rounded">Status: <%= ticket.status %></p>
+      </div>
+    </div>
+
+    <!-- Ticket Editor -->
+    <form action="/admin/ticket/update" method="POST" class="space-y-6">
+      <!-- Title and Subtitle -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="title" class="block text-gray-700 font-medium mb-2">Title</label>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            value="<%= ticket.title %>" 
+            class="w-full border-gray-300 rounded-lg p-2" 
+            required>
+        </div>
+        <div>
+          <label for="subtitle" class="block text-gray-700 font-medium mb-2">Subtitle</label>
+          <input 
+            type="text" 
+            id="subtitle" 
+            name="subtitle" 
+            value="<%= ticket.subtitle %>" 
+            class="w-full border-gray-300 rounded-lg p-2">
+        </div>
+      </div>
+
+      <!-- Ticket Pricing -->
+      <div class="grid grid-cols-3 gap-4">
+        <!-- Full-Price Ticket -->
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Full-Price</label>
+          <div class="flex space-x-2">
+            <input 
+              type="number" 
+              name="fullPriceCount" 
+              placeholder="N tickets" 
+              value="<%= ticket.fullPriceCount %>" 
+              class="w-1/2 border-gray-300 rounded-lg p-2" 
+              required>
+            <input 
+              type="number" 
+              name="fullPrice" 
+              placeholder="Price" 
+              value="<%= ticket.fullPrice %>" 
+              class="w-1/2 border-gray-300 rounded-lg p-2" 
+              required>
+          </div>
+        </div>
+
+        <!-- Concession-Price Ticket -->
+        <div>
+          <label class="block text-gray-700 font-medium mb-2">Concession-Price</label>
+          <div class="flex space-x-2">
+            <input 
+              type="number" 
+              name="concessionPriceCount" 
+              placeholder="N tickets" 
+              value="<%= ticket.concessionPriceCount %>" 
+              class="w-1/2 border-gray-300 rounded-lg p-2">
+            <input 
+              type="number" 
+              name="concessionPrice" 
+              placeholder="Price" 
+              value="<%= ticket.concessionPrice %>" 
+              class="w-1/2 border-gray-300 rounded-lg p-2">
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div>
+        <button 
+          type="submit" 
+          class="w-full bg-green-500 text-white py-3 rounded-lg font-bold hover:bg-green-600">
+          Update
+        </button>
+      </div>
+    </form>
+  </main>
 </body>
 </html>
