@@ -14,13 +14,7 @@
             <div class="text-sm">Admin Home</div>
             <div class="text-xs text-gray-500">By: Yarli Rabelo</div>
         </div>
-        <nav class="flex space-x-4">
-            <% if (user) { %>
-                <p class="mt-2">Logged in as: <strong><%= user.username %></strong></p>
-                <a href="/logout" class="bg-red-500 px-4 py-2 rounded hover:bg-red-600">Log Out</a>
-            <% } else { %>
-                <a href="/login" class="bg-green-500 px-4 py-2 rounded hover:bg-green-600">Log In</a>
-            <% } %>       
+        <nav class="flex space-x-4">    
             <a href="/products/customer-sales-page-d" class="text-gray-600">Event List</a>
             <a href="/users/admin-settings" class="text-blue-500 font-bold">Settings</a>
         </nav>
