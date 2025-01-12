@@ -12,12 +12,27 @@ const express = require("express");
 const router = express.Router();
 
 /**
- * @desc Display all the users
+ * @desc Validate the user existence
  */
 
-router.get("/main", (req, res) => {
-    res.render("main.ejs");
-});
+function checkCredentials(username, password, callback) {
+    const query = `SELECT * FROM users WHERE user_name = ? AND password = ?`;
+
+    db.get(query, [username, password], (err, row) => {
+        if (err) {
+            console.error("Error checking credentials:", err.message);
+            return callback(err, null);
+        }
+        if (row) {
+            // User found
+            return callback(null, true);
+        } else {
+            // User not found
+            return callback(null, false);
+        }
+    });
+}
+
 
 router.get("/admin-settings", (req, res) => {
     res.render("admin-settings.ejs")
@@ -26,6 +41,22 @@ router.get("/admin-settings", (req, res) => {
 /* User Sign In */
 router.get("/sign-in", (req, res) => {
     res.render("sign-in.ejs")
+});
+
+router.post("/loggedIn", (req, res) => {
+    const { username, password } = req.body;
+
+    checkCredentials(username, password, (err, isValid) => {
+        if(err) {
+            return res.status(500).send("An error occurred while validating credentials.");
+        }
+        if (isValid) {
+            console.log("Login successful!");
+            res.redirect("/users/admin-home");
+        } else {
+            return res.status(401).send("Invalid username or password.");
+        }
+    });
 });
 
 //Use .post() method to apply queries
@@ -56,7 +87,7 @@ router.get("/sign-up", (req, res) => {
 router.get("/admin-home", (req, res) => {
 
     draft_elements = "SELECT id, title, subtitle, created_at, modified_date FROM ticket WHERE publication_status = 'draft'"
-    published_elements = "SELECT id, title, subtitle, created_at, modified_date FROM ticket WHERE publication_status = 'published'"
+    published_elements = "SELECT id, title, subtitle, created_at, modified_date, published_date FROM ticket WHERE publication_status = 'published'"
 
     //Execute both queries asynchronously 
     Promise.all([
@@ -94,7 +125,7 @@ router.get("/admin-home", (req, res) => {
             title: item.title,
             subtitle: item.subtitle,
             created: item.created_at,
-            modified: item.modified_date
+            published: item.published_date
         }));
 
         res.render("admin-home.ejs", {draft, published});
@@ -112,7 +143,7 @@ router.get("/admin-home", (req, res) => {
 
 router.get("/admin-edit-product/:id", (req, res) => {
     // SQL query to fetch draft tickets by ID
-    const draft_elements = "SELECT id, title, subtitle, count, full_price, concession_price, created_at, modified_date, publication_status FROM ticket WHERE id = ?";
+    const draft_elements = "SELECT id, title, subtitle, count_general, count_VIP, full_price, concession_price, created_at, modified_date, publication_status FROM ticket WHERE id = ?";
     const ticketId = req.params.id; // Retrieve the ID from the URL parameters
 
     global.db.get(draft_elements, [ticketId], (err, result) => {
@@ -130,9 +161,9 @@ router.get("/admin-edit-product/:id", (req, res) => {
                 status: result.publication_status,
                 title: result.title,
                 subtitle: result.subtitle,
-                fullPriceCount: result.count,
-                fullPrice: result.full_price,
-                concessionPriceCount: result.count,
+                generalCount: result.count_general,
+                vipCount: result.count_VIP,
+                generalPrice: result.full_price, 
                 concessionPrice: result.concession_price,
             };
 
@@ -145,12 +176,12 @@ router.get("/admin-edit-product/:id", (req, res) => {
 
 router.post("/admin-edit-product/:id", (req, res, next) => {
     const ticketId = req.params.id;
-    let {title, subtitle, count, full_price, concession_price} = req.body;
+    let {title, subtitle, count_general, count_VIP, full_price, concession_price} = req.body;
 
     console.log("Receiving data:", req.body);
 
     // Map the request body keys to the database columns
-    const elements = { title, subtitle, count, full_price, concession_price };
+    const elements = { title, subtitle, count_general, count_VIP, full_price, concession_price };
 
     let updateFields = []
     let updateValues = []
@@ -187,7 +218,7 @@ router.post("/admin-edit-product/:id", (req, res, next) => {
 });
 
 router.post("/admin-home", async (req, res, next) => {
-    let { action, ticketId, title, subtitle, count, full_price, concession_price } = req.body;
+    let { action, ticketId, title, subtitle, count_general, count_VIP, full_price, concession_price } = req.body;
     console.log("action: ", action);
     console.log(ticketId);
 
@@ -222,10 +253,10 @@ router.post("/admin-home", async (req, res, next) => {
     } else if (action === "add") {
 
         // Correctly declare insertQuery
-        let insertQuery = 'INSERT INTO ticket (title, subtitle, count, full_price, concession_price) VALUES (?, ?, ?, ?, ?)';
+        let insertQuery = 'INSERT INTO ticket (title, subtitle, count_general, count_VIP, full_price, concession_price) VALUES (?, ?, ?, ?, ?, ?)';
 
         // Insert the new ticket into the database
-        global.db.run(insertQuery, [title, subtitle, count, full_price, concession_price], (err) => {
+        global.db.run(insertQuery, [title, subtitle, count_general, count_VIP, full_price, concession_price], (err) => {
             if (err) {
                 console.error(err);
                 return next(err);  // Return error to next middleware

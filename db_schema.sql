@@ -31,14 +31,15 @@ CREATE TABLE ticket (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL UNIQUE,
     subtitle TEXT NOT NULL,
-    count INTEGER NOT NULL DEFAULT 0, --track the number of available tickets
+    count_general INTEGER NOT NULL DEFAULT 0, --track the number of available tickets
+    count_VIP INTEGER NOT NULL DEFAULT 0, --track the number of available tickets
     full_price REAL NOT NULL CHECK(full_price >= 0),
     concession_price REAL NOT NULL CHECK(concession_price >= 0),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     modified_date DATETIME,
     published_date TEXT,
     publication_status TEXT CHECK (publication_status IN ('published', 'draft')) DEFAULT 'draft',
-    availability_status TEXT CHECK (availability_status IN ('available', 'unavailable')) DEFAULT 'unavailable'
+    availability_status TEXT CHECK (availability_status IN ('available', 'unavailable')) DEFAULT 'available'
 );
 
 CREATE TRIGGER update_modified_date
@@ -49,6 +50,17 @@ BEGIN
     SET modified_date = CURRENT_TIMESTAMP
     WHERE id = OLD.id;
 END;
+
+CREATE TRIGGER update_status_after_order
+AFTER UPDATE ON ticket
+FOR EACH ROW
+BEGIN
+    -- If the order is completed, change product status
+    UPDATE ticket
+    SET availability_status = 'unavailable'
+    WHERE id = NEW.id AND NEW.count_general = 0 AND NEW.count_VIP = 0;
+END;
+
 
 
 -- CREATE TABLE IF NOT EXISTS email_accounts (

@@ -14,7 +14,10 @@
             <div class="text-sm">Admin Home</div>
             <div class="text-xs text-gray-500">By: Yarli Rabelo</div>
         </div>
-        <a href="/views/admin-settings.ejs" class="text-blue-500 font-semibold">Settings</a>
+        <nav class="flex space-x-4">
+            <a href="/products/customer-sales-page-d" class="text-gray-600">Event List</a>
+            <a href="/users/admin-settings" class="text-blue-500 font-bold">Settings</a>
+        </nav>
     </header>
 
     <!-- Main Content -->
@@ -31,13 +34,16 @@
                     <input type="text" name="subtitle" placeholder="Subtitle" class="w-full border-gray-300 rounded-lg p-2 mb-2" required>
                 </div>
                 <div class="mb-4">
-                    <input type="text" name="count" placeholder="Qty" class="w-full border-gray-300 rounded-lg p-2 mb-2" required>
+                    <input type="text" name="count_general" placeholder="General Qty" class="w-full border-gray-300 rounded-lg p-2 mb-2" required>
                 </div>
                 <div class="mb-4">
-                    <input type="text" name="full_price" placeholder="FullPrice" class="w-full border-gray-300 rounded-lg p-2 mb-2" required>
+                    <input type="text" name="full_price" placeholder="General Price" class="w-full border-gray-300 rounded-lg p-2 mb-2" required>
                 </div>
                 <div class="mb-4">
-                    <input type="text" name="concession_price" placeholder="ConcessionPrice" class="w-full border-gray-300 rounded-lg p-2 mb-2" required>
+                    <input type="text" name="count_VIP" placeholder="VIP Qty" class="w-full border-gray-300 rounded-lg p-2 mb-2" required>
+                </div>
+                <div class="mb-4">
+                    <input type="text" name="concession_price" placeholder="VIP Price" class="w-full border-gray-300 rounded-lg p-2 mb-2" required>
                 </div>
                 <button type="submit" name="action" value="add" class="bg-blue-500 text-white px-4 py-2 rounded">Add Ticket</button>
             </form>

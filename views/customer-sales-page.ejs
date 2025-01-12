@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Attendee Home Page</title>
+  <title>Visitor Home Page</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
@@ -13,7 +13,7 @@
     <!-- <h1 class="text-xl font-bold">BuyTickets.com</h1> -->
     <div>
         <div class="text-lg font-bold">BuyTickets.com</div>
-        <div class="text-sm">Attendee Home Page</div>
+        <div class="text-sm">Visitor Home Page</div>
         <div class="text-xs text-gray-500">By: Yarli Rabelo</div>
     </div>
     <nav class="flex space-x-4">
@@ -34,11 +34,14 @@
       <% events.forEach(event => { %>
         <div class="bg-white shadow-lg rounded-lg p-4 border">
           <h2 class="text-lg font-bold"><%= event.name %></h2>
-          <% if (event.url) { %>
+          <% if (event.id) { %>
+            <div class="text-xs text-gray-500">General Price: $<%= event.generalPrice %></div>
+            <div class="text-xs text-gray-500">VIP Price: $<%= event.vipPrice %></div>
+            <div class="text-xs text-gray-500"><%= event.availability %></div>
             <a 
-              href="<%= event.url %>" 
+              href="/products/customer-checkout/<%= event.id %>"
               class="text-blue-500 font-medium hover:underline">
-              Visit Event
+              Book a place
             </a>
           <% } else { %>
             <button 

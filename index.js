@@ -31,8 +31,27 @@ global.db = new sqlite3.Database('./database.db',function(err){
 });
 
 // Handle requests to the home page 
-app.get('/', (req, res) => {
-    res.send('Hello World!')
+app.get('/main', (req, res) => {
+
+    queryUser = "SELECT user_name, password FROM users WHERE role = 'admin'";
+
+    const userId = req.params.id; // Retrieve the ID from the URL parameters
+
+    global.db.get(queryUser, [userId], (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).send("Error fetching user data.");
+        } else if (!result) {
+            res.status(404).send("User not found.");
+        } else {
+            // Map the result to create a ticket structure for the template
+            const credentials = { username: result.user_name, password: result.password };
+
+            // Render the admin-edit-product.ejs template with the ticket data
+            res.render('main.ejs', { credentials });
+            console.log('Credential Fetched');
+        }
+    });
 });
 
 // Add all the route handlers in usersRoutes to the app under the path /users

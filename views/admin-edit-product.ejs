@@ -58,20 +58,20 @@
       <div class="grid grid-cols-3 gap-4">
         <!-- Full-Price Ticket -->
         <div>
-          <label class="block text-gray-700 font-medium mb-2">Qty and Full-Price</label>
+          <label class="block text-gray-700 font-medium mb-2">Qty and General-Price</label>
           <div class="flex space-x-2">
             <input 
               type="number" 
-              name="fullPriceCount" 
+              name="generalCount" 
               placeholder="N tickets" 
-              value="<%= ticket.fullPriceCount %>" 
+              value="<%= ticket.generalCount %>" 
               class="w-1/2 border-gray-300 rounded-lg p-2" 
               required>
             <input 
               type="number" 
-              name="fullPrice" 
+              name="generalPrice" 
               placeholder="Price" 
-              value="<%= ticket.fullPrice %>" 
+              value="<%= ticket.generalPrice %>" 
               class="w-1/2 border-gray-300 rounded-lg p-2" 
               required>
           </div>
@@ -79,13 +79,13 @@
 
         <!-- Concession-Price Ticket -->
         <div>
-          <label class="block text-gray-700 font-medium mb-2">Qty and Concession-Price</label>
+          <label class="block text-gray-700 font-medium mb-2">Qty and VIP-Price</label>
           <div class="flex space-x-2">
             <input 
               type="number" 
-              name="concessionPriceCount" 
+              name="vipCount" 
               placeholder="N tickets" 
-              value="<%= ticket.concessionPriceCount %>" 
+              value="<%= ticket.vipCount %>" 
               class="w-1/2 border-gray-300 rounded-lg p-2">
             <input 
               type="number" 
