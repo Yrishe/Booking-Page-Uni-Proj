@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Note Manager</title>
+    <title>Admin Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -11,82 +11,117 @@
     <header class="p-4 flex justify-between items-center bg-gray-200">
         <div>
             <div class="text-lg font-bold">BuyTickets.com</div>
-            <div class="text-sm">Organizer Home</div>
-            <div class="text-xs text-gray-500">Author</div>
+            <div class="text-sm">Admin Home</div>
+            <div class="text-xs text-gray-500">By: Yarli Rabelo</div>
         </div>
         <a href="/views/admin-settings.ejs" class="text-blue-500 font-semibold">Settings</a>
     </header>
 
     <!-- Main Content -->
     <main class="p-8">
-        <!-- Draft Note List -->
+        <!-- Draft ticket List -->
         <section class="mb-8">
-            <h2 class="text-lg font-bold mb-4">Draft Note - List</h2>
-            <table class="table-auto w-full text-left bg-white shadow-md rounded-lg">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="p-2">ID</th>
-                        <th class="p-2">Title</th>
-                        <th class="p-2">Subtitle</th>
-                        <th class="p-2">Created</th>
-                        <th class="p-2">Last Modified</th>
-                        <th class="p-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% draftNotes.forEach(note => { %>
-                        <tr class="border-t">
-                            <td class="p-2"><%= note.id %></td>
-                            <td class="p-2"><%= note.title %></td>
-                            <td class="p-2"><%= note.subtitle %></td>
-                            <td class="p-2"><%= note.created %></td>
-                            <td class="p-2"><%= note.modified %></td>
-                            <td class="p-2 flex space-x-2">
-                                <a href="/edit/<%= note.id %>" class="bg-gray-500 text-white px-3 py-1 rounded">Edit</a>
-                                <button class="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
-                            </td>
+            <!-- Add New Ticket Form -->
+            <form action="/users/admin-home" method="POST" class="mb-6">
+                <h2 class="text-lg font-bold mb-4">Add New Ticket</h2>
+                <div class="mb-4">
+                    <input type="text" name="title" placeholder="Title" class="w-full border-gray-300 rounded-lg p-2 mb-2" required>
+                </div>
+                <div class="mb-4">
+                    <input type="text" name="subtitle" placeholder="Subtitle" class="w-full border-gray-300 rounded-lg p-2 mb-2" required>
+                </div>
+                <div class="mb-4">
+                    <input type="text" name="count" placeholder="Qty" class="w-full border-gray-300 rounded-lg p-2 mb-2" required>
+                </div>
+                <div class="mb-4">
+                    <input type="text" name="full_price" placeholder="FullPrice" class="w-full border-gray-300 rounded-lg p-2 mb-2" required>
+                </div>
+                <div class="mb-4">
+                    <input type="text" name="concession_price" placeholder="ConcessionPrice" class="w-full border-gray-300 rounded-lg p-2 mb-2" required>
+                </div>
+                <button type="submit" name="action" value="add" class="bg-blue-500 text-white px-4 py-2 rounded">Add Ticket</button>
+            </form>
+            <form id="publishForm" action="/users/admin-home" method="POST">
+                <h2 class="text-lg font-bold mb-4">Draft ticket - List</h2>
+                <table class="table-auto w-full text-left bg-white shadow-md rounded-lg">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="p-2">Select</th>
+                            <th class="p-2">ID</th>
+                            <th class="p-2">Title</th>
+                            <th class="p-2">Subtitle</th>
+                            <th class="p-2">Created</th>
+                            <th class="p-2">Last Modified</th>
+                            <th class="p-2">Actions</th>
                         </tr>
-                    <% }); %>
-                </tbody>
-            </table>
-            <button class="mt-4 bg-gray-500 text-white px-4 py-2 rounded">Publish</button>
+                    </thead>
+                    <tbody>
+                        <% draft.forEach(ticket => { %>
+                            <tr class="border-t">
+                                <td class="p-2">
+                                    <input type="checkbox" name="selectedTickets" value="<%= ticket.id %>" class="ticket-checkbox">
+                                </td>
+                                <td class="p-2"><%= ticket.id %></td>
+                                <td class="p-2"><%= ticket.title %></td>
+                                <td class="p-2"><%= ticket.subtitle %></td>
+                                <td class="p-2"><%= ticket.created %></td>
+                                <td class="p-2"><%= ticket.modified %></td>
+                                <td class="p-2 flex space-x-2">
+                                    <a href="/users/admin-edit-product/<%= ticket.id %>" class="bg-gray-500 text-white px-3 py-1 rounded">Edit</a>
+                                    <form action="/users/delete-ticket/<%= ticket.id %>" method="POST" class="inline">
+                                        <input type="hidden" name="ticketId" value="<%= ticket.id %>">
+                                        <button type="submit" name="action" value="delete" class="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+                <button id="publish" name="action" value="publish" class="mt-4 bg-green-500 text-white px-4 py-2 rounded">Publish</button>
+            </form>
         </section>
 
-        <!-- Published Note List -->
+        <!-- Published ticket List -->
         <section>
-            <h2 class="text-lg font-bold mb-4">Published Note - List</h2>
-            <table class="table-auto w-full text-left bg-white shadow-md rounded-lg">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="p-2">ID</th>
-                        <th class="p-2">Title</th>
-                        <th class="p-2">Subtitle</th>
-                        <th class="p-2">Created</th>
-                        <th class="p-2">Published</th>
-                        <th class="p-2">Likes</th>
-                        <th class="p-2">Comments</th>
-                        <th class="p-2">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% publishedNotes.forEach(note => { %>
-                        <tr class="border-t">
-                            <td class="p-2"><%= note.id %></td>
-                            <td class="p-2"><%= note.title %></td>
-                            <td class="p-2"><%= note.subtitle %></td>
-                            <td class="p-2"><%= note.created %></td>
-                            <td class="p-2"><%= note.published %></td>
-                            <td class="p-2"><%= note.likes %></td>
-                            <td class="p-2"><%= note.comments %></td>
-                            <td class="p-2 flex space-x-2">
-                                <button class="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
-                                <button class="bg-gray-500 text-white px-3 py-1 rounded">Share</button>
-                            </td>
+            <form id="refresh" action="/users/admin-home" method="POST">
+                <h2 class="text-lg font-bold mb-4">Published ticket - List</h2>
+                <table class="table-auto w-full text-left bg-white shadow-md rounded-lg">
+                    <thead>
+                        <tr class="bg-gray-200">
+                            <th class="p-2">ID</th>
+                            <th class="p-2">Title</th>
+                            <th class="p-2">Subtitle</th>
+                            <th class="p-2">Created</th>
+                            <th class="p-2">Published</th>
+                            <th class="p-2">Likes</th>
+                            <th class="p-2">Comments</th>
+                            <th class="p-2">Actions</th>
                         </tr>
-                    <% }); %>
-                </tbody>
-            </table>
-            <button class="mt-4 bg-gray-500 text-white px-4 py-2 rounded">Refresh</button>
+                    </thead>
+                    <tbody>
+                        <% published.forEach(ticket => { %>
+                            <tr class="border-t">
+                                <td class="p-2"><%= ticket.id %></td>
+                                <td class="p-2"><%= ticket.title %></td>
+                                <td class="p-2"><%= ticket.subtitle %></td>
+                                <td class="p-2"><%= ticket.created %></td>
+                                <td class="p-2"><%= ticket.published %></td>
+                                <td class="p-2"><%= ticket.likes %></td>
+                                <td class="p-2"><%= ticket.comments %></td>
+                                <td class="p-2 flex space-x-2">
+                                    <form action="/users/delete-ticket/<%= ticket.id %>" method="POST" class="inline">
+                                        <input type="hidden" name="ticketId" value="<%= ticket.id %>">
+                                        <button type="submit" name="action" value="delete" class="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
+                                    </form>
+                                    <button class="bg-gray-500 text-white px-3 py-1 rounded">Share</button>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+                <button class="mt-4 bg-amber-500 text-white px-4 py-2 rounded">Refresh</button>
+            </form>
+
         </section>
     </main>
 </body>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Ticket Editor</title>
+  <title>Edit Ticket (Admin)</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
@@ -11,9 +11,9 @@
   <!-- Header -->
   <header class="flex justify-between items-center bg-white shadow p-4">
     <div>
-      <h1 class="text-lg font-bold">App Name</h1>
-      <p class="text-gray-600">Subtitle</p>
-      <p class="text-gray-400 text-sm">Author</p>
+      <h1 class="text-lg font-bold">BuyTickets.com</h1>
+      <p class="text-gray-600">Edit Ticket (Admin)</p>
+      <p class="text-gray-400 text-sm">By: Yarli Rabelo</p>
     </div>
     <a href="/settings" class="text-blue-500 font-bold hover:underline">Settings</a>
   </header>
@@ -30,7 +30,7 @@
     </div>
 
     <!-- Ticket Editor -->
-    <form action="/admin/ticket/update" method="POST" class="space-y-6">
+    <form action="/users/admin-edit-product/<%= ticket.id %>" method="POST" class="space-y-6">
       <!-- Title and Subtitle -->
       <div class="grid grid-cols-2 gap-4">
         <div>
@@ -58,7 +58,7 @@
       <div class="grid grid-cols-3 gap-4">
         <!-- Full-Price Ticket -->
         <div>
-          <label class="block text-gray-700 font-medium mb-2">Full-Price</label>
+          <label class="block text-gray-700 font-medium mb-2">Qty and Full-Price</label>
           <div class="flex space-x-2">
             <input 
               type="number" 
@@ -79,7 +79,7 @@
 
         <!-- Concession-Price Ticket -->
         <div>
-          <label class="block text-gray-700 font-medium mb-2">Concession-Price</label>
+          <label class="block text-gray-700 font-medium mb-2">Qty and Concession-Price</label>
           <div class="flex space-x-2">
             <input 
               type="number" 

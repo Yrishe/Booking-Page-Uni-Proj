@@ -23,37 +23,245 @@ router.get("/admin-settings", (req, res) => {
     res.render("admin-settings.ejs")
 });
 
-router.get("/login", (req, res) => {
-    res.render("login.ejs")
-});
-
-//Use .get() method to retrieve page
-router.get("/admin-home", (req, res) => {
-    res.render("admin-home.ejs", {url:req.protocol+"://"+req.headers.host});
+/* User Sign In */
+router.get("/sign-in", (req, res) => {
+    res.render("sign-in.ejs")
 });
 
 //Use .post() method to apply queries
-// router.post();
-router.get('/admin-home-dt', (req, res) => {
-    const draftNotes = [
-        { id: 1, title: 'Draft 1', subtitle: 'Subtitle 1', created: '2025-01-01', modified: '2025-01-02' },
-        { id: 2, title: 'Draft 2', subtitle: 'Subtitle 2', created: '2025-01-03', modified: '2025-01-04' },
-    ];
+// router.post("/sign-in", (req, res) => {
 
-    const publishedNotes = [
-        { id: 1, title: 'Note 1', subtitle: 'Subtitle 1', created: '2025-01-01', published: '2025-01-02', likes: 10, comments: 5 },
-        { id: 2, title: 'Note 2', subtitle: 'Subtitle 2', created: '2025-01-03', published: '2025-01-04', likes: 20, comments: 15 },
-    ];
+// });
 
-    res.render("admin-home.ejs", { draftNotes, publishedNotes });
+/* User Sign Up*/
+router.get("/sign-up", (req, res) => {
+    res.render("sign-up.ejs");
+});
+
+// router.post("/sign-up", (req, res) => {
+//     const { username, password } = req.body;
+// // Handle login logic (authentication, validation, etc.)
+//     res.redirect("/dashboard");
+// });
+/*******************/
+
+/** 
+ * @desc Admin Home Page
+ * */  
+
+// app.post('/admin-home-add', async (req, res, next) => {
+
+// });
+
+router.get("/admin-home", (req, res) => {
+
+    draft_elements = "SELECT id, title, subtitle, created_at, modified_date FROM ticket WHERE publication_status = 'draft'"
+    published_elements = "SELECT id, title, subtitle, created_at, modified_date FROM ticket WHERE publication_status = 'published'"
+
+    //Execute both queries asynchronously 
+    Promise.all([
+        new Promise((resolve, reject) => {
+            global.db.all(draft_elements, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        }),
+        new Promise((resolve, reject) => {
+            global.db.all(published_elements, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result)
+                }
+            })
+        })
+    ])
+    .then(([draft_results, published_results]) => {
+        //Process the results to structure the values
+        const draft = draft_results.map(item => ({
+            id: item.id,
+            title: item.title,
+            subtitle: item.subtitle,
+            created: item.created_at,
+            modified: item.modified_date
+        }));
+
+        const published = published_results.map(item => ({
+            id: item.id,
+            title: item.title,
+            subtitle: item.subtitle,
+            created: item.created_at,
+            modified: item.modified_date
+        }));
+
+        res.render("admin-home.ejs", {draft, published});
+    })
+    .catch((err) => {
+        console.error(err);
+        res.redirect("/");
+    });
 });
 
 
-router.get("/admin-edit-product", (req, res) => {
-    res.render("admin-edit-product.ejs");
+/** 
+ * @desc Admin Edit Page
+ * */  
+
+router.get("/admin-edit-product/:id", (req, res) => {
+    // SQL query to fetch draft tickets by ID
+    const draft_elements = "SELECT id, title, subtitle, count, full_price, concession_price, created_at, modified_date, publication_status FROM ticket WHERE id = ?";
+    const ticketId = req.params.id; // Retrieve the ID from the URL parameters
+
+    global.db.get(draft_elements, [ticketId], (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).send("Error fetching ticket data.");
+        } else if (!result) {
+            res.status(404).send("Ticket not found.");
+        } else {
+            // Map the result to create a ticket structure for the template
+            const ticket = {
+                id: result.id,
+                createdDate: result.created_at,
+                lastModified: result.modified_date,
+                status: result.publication_status,
+                title: result.title,
+                subtitle: result.subtitle,
+                fullPriceCount: result.count,
+                fullPrice: result.full_price,
+                concessionPriceCount: result.count,
+                concessionPrice: result.concession_price,
+            };
+
+            // Render the admin-edit-product.ejs template with the ticket data
+            res.render('admin-edit-product.ejs', { ticket });
+            console.log('It works');
+        }
+    });
 });
 
-// router.post();
+router.post("/admin-edit-product/:id", (req, res, next) => {
+    const ticketId = req.params.id;
+    let {title, subtitle, count, full_price, concession_price} = req.body;
+
+    console.log("Receiving data:", req.body);
+
+    // Map the request body keys to the database columns
+    const elements = { title, subtitle, count, full_price, concession_price };
+
+    let updateFields = []
+    let updateValues = []
+
+    // Iterate over the elements to construct dynamic fields
+    for (const [key, value] of Object.entries(elements)) {
+        if (value !== undefined && value !== null && value !== '') {
+            updateFields.push(`${key} = ?`);
+            updateValues.push(value);
+        }
+    }
+
+    if(updateValues.length === 0) return res.status(400).send("No fields provided to update");
+
+    updateValues.push(ticketId)
+
+    let updateTicket = `UPDATE ticket SET ${updateFields.join(", ")} WHERE id = ?`;
+    
+    console.log("Query:", updateTicket);
+    console.log("Values:", updateValues);
+    console.log("Completing query");
+
+    // Execute the query and send a confirmation message
+    global.db.run(updateTicket, updateValues,
+        function (err) {
+            if (err) {
+                next(err); //send the error on to the error handler
+            } else {
+                console.log(`Data updated @ id ${ticketId}!`);
+                res.redirect("/users/admin-home");
+            }
+        }
+    );
+});
+
+router.post("/admin-home", async (req, res, next) => {
+    let { action, ticketId, title, subtitle, count, full_price, concession_price } = req.body;
+    console.log("action: ", action);
+    console.log(ticketId);
+
+    if (action === "publish") {
+        // Selected ticket IDs
+        let selectedTickets = req.body.selectedTickets;
+
+        if (!selectedTickets || selectedTickets.length == 0) {
+            return res.status(404).send("No tickets selected.");
+        }
+
+        if (!Array.isArray(selectedTickets)) {
+            // If only one checkbox is ticked, it's a string; convert it to an array
+            selectedTickets = [selectedTickets];
+        }
+
+        console.log("Selected Tickets:", selectedTickets);
+
+        // Prepare the SQL query
+        const updateQuery = `UPDATE ticket SET published_date = CURRENT_TIMESTAMP, publication_status = ? WHERE id IN (${selectedTickets.map(() => '?').join(', ')})`;
+        let params = ['published', ...selectedTickets];
+        console.log(params);
+
+        global.db.run(updateQuery, params, (err) => {
+            if (err) {
+                console.error(err);
+                return next(err);
+            }
+            console.log(`Published tickets: ${selectedTickets.join(", ")}`);
+            res.redirect("/users/admin-home");
+        });
+    } else if (action === "add") {
+
+        // Correctly declare insertQuery
+        let insertQuery = 'INSERT INTO ticket (title, subtitle, count, full_price, concession_price) VALUES (?, ?, ?, ?, ?)';
+
+        // Insert the new ticket into the database
+        global.db.run(insertQuery, [title, subtitle, count, full_price, concession_price], (err) => {
+            if (err) {
+                console.error(err);
+                return next(err);  // Return error to next middleware
+            }
+            // Redirect back to the admin-home page to reload the tickets
+            res.redirect('/users/admin-home');
+        });
+    } else if(action === "delete"){
+        console.log("delete condition")
+        if(!ticketId) return res.status(400).send("Ticket ID is missing.")
+
+        let deleteQuery = 'DELETE FROM ticket WHERE id = ?'
+        global.db.run(deleteQuery, [ticketId], (err) => {
+            if(err) {
+                console.error(err);
+                return next(err);
+            }
+            res.redirect("/users/admin-home");
+        });
+    } else {
+        // Handle case where no action is provided or action is invalid
+        return res.status(400).send("Invalid action.");
+    }
+});
+
+// router.post("/users/delete-ticket/:id", (req, res, next) => {
+//     const ticketId = req.params.id;
+//     const deleteQuery = 'DELETE FROM ticket WHERE id = ?'
+//     global.db.run(deleteQuery, [ticketId], (err) => {
+//         if(err) {
+//             console.error('Error deleting ticket: ', err.message);
+//             return next(err);
+//         }
+//         res.redirect('/users/admin-home')
+//     })
+// });
 
 router.get("/list-users", (req, res, next) => {
     // Define the query
@@ -99,40 +307,15 @@ router.post("/add-user", (req, res, next) => {
     );
 });
 
-router.get("/users-login", (req, res) => {
-    res.render("users-login.ejs");
-});
+// router.post("/admin/ticket/update", (req, res) => {
+//     const updatedTicket = req.body;
 
-router.post("/users-login", (req, res) => {
-    const { username, password } = req.body;
-// Handle login logic (authentication, validation, etc.)
-    res.redirect("/dashboard");
-});
-
-router.get("/admin-ticket/:id", (req, res) => {
-    const ticket = {
-        createdDate: '2025-01-01',
-        lastModified: '2025-01-05',
-        status: 'Draft',
-        title: 'Event Title',
-        subtitle: 'Event Subtitle',
-        fullPriceCount: 50,
-        fullPrice: 20,
-        concessionPriceCount: 20,
-        concessionPrice: 15,
-      };
-      res.render('admin-edit-product.ejs', { ticket });
-});
-
-router.post("/admin/ticket/update", (req, res) => {
-    const updatedTicket = req.body;
-
-    // Logic to update the ticket in the database
-    console.log('Updated Ticket:', updatedTicket);
+//     // Logic to update the ticket in the database
+//     console.log('Updated Ticket:', updatedTicket);
   
-    // Redirect to an EJS page (e.g., confirmation or dashboard)
-    res.render('confirmation', { ticket: updatedTicket });
-});
+//     // Redirect to an EJS page (e.g., confirmation or dashboard)
+//     res.render('confirmation', { ticket: updatedTicket });
+// });
 
 // Export the router object so index.js can access it
 module.exports = router;

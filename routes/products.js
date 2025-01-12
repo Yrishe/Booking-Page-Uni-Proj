@@ -22,22 +22,19 @@ router.get("/customer-checkout/:id", (req, res) => {
     res.render("customer-checkout.ejs", { event });
 });
 
-// router.post();
-
 router.get("/customer-sales-page-d", (req, res) => {
-
-    const events = [
-        { name: 'Event 1', url: '/event-1' },
-        { name: 'Event 2', url: null },
-        { name: 'Event 3', url: null },
-        { name: 'Event 4', url: null },
-      ];
-      
-    res.render('customer-sales-page.ejs', { events });
-
-    // res.render("customer-sales-page.ejs");
+    let queryPublished = "SELECT * FROM ticket WHERE publication_status = 'published'"
+    global.db.all(queryPublished, (err, result) => {
+      if(err) {
+        console.error(err);
+        return res.status(500).send("Error fetching data")
+      }
+      let events = result.map(event => ({
+        name: event.title,
+        url: `event-${event.id}`
+      }));
+      res.render('customer-sales-page.ejs', { events });
+    });
 });
-
-// router.post();
 
 module.exports = router;
