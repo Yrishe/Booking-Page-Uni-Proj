@@ -4,9 +4,10 @@
 */
 
 // Set up express, bodyparser and EJS
-const express = require('express');
+const express = require("express");
 const app = express();
-const path = require("path");
+// const path = require("path");
+const session = require("express-session");
 const port = 3000;
 var bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -29,6 +30,21 @@ global.db = new sqlite3.Database('./database.db',function(err){
         global.db.run("PRAGMA foreign_keys=ON"); // tell SQLite to pay attention to foreign key constraints
     }
 });
+
+app.use(session({
+    secret: 'secret-key', //used to sign the session ID cookie
+    resave: false, //don't save unmodified session
+    saveUninitialized: false, //Don't create session until new data is stored
+    cookie: { secure:false } //only true if using https
+}));
+
+function isAuthenticated(req, res, next) {
+    if (req.session.user) {
+      return next(); // User is authenticated
+    } else {
+      return res.redirect('/login'); // Redirect to login
+    }
+}
 
 // Handle requests to the home page 
 app.get('/main', (req, res) => {
@@ -60,6 +76,7 @@ app.use('/users', usersRoutes);
 
 // Add all the route handlers in usersRoutes to the app under the path /users
 const productRoutes = require('./routes/products');
+const { Cookie } = require('express-session');
 app.use('/products', productRoutes);
 
 
@@ -68,3 +85,4 @@ app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
 
+module.exports = { isAuthenticated };

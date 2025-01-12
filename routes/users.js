@@ -10,6 +10,25 @@
 
 const express = require("express");
 const router = express.Router();
+const auth  = require("../index"); //import authentication func
+// const session = require("express-session");
+
+// app.use(session({
+//     secret: 'secret-key', //used to sign the session ID cookie
+//     resave: false, //don't save unmodified session
+//     saveUninitialized: false, //Don't create session until new data is stored
+//     cookie: { secure:false } //only true if using https
+// }));
+
+function isAuthenticated(req, res, next) {
+    if (req.session.user) {
+        console.log("User authenticated");
+        return next(); // User is authenticated
+    } else {
+        console.log("User not authenticated");
+      return res.redirect('/main'); // Redirect to login
+    }
+}
 
 /**
  * @desc Validate the user existence
@@ -35,7 +54,7 @@ function checkCredentials(username, password, callback) {
 
 
 router.get("/admin-settings", (req, res) => {
-    res.render("admin-settings.ejs")
+    res.render("admin-settings.ejs");
 });
 
 /* User Sign In */
@@ -59,10 +78,14 @@ router.post("/loggedIn", (req, res) => {
     });
 });
 
-//Use .post() method to apply queries
-// router.post("/sign-in", (req, res) => {
-
-// });
+router.get("/logout", (req, res) => {
+    req.session.destroy((err) => {
+        if(err) {
+            return res.status(500).send("Error logging out.");
+        }
+        res.redirect("/main");
+    });
+});
 
 /* User Sign Up*/
 router.get("/sign-up", (req, res) => {
@@ -84,7 +107,7 @@ router.get("/sign-up", (req, res) => {
 
 // });
 
-router.get("/admin-home", (req, res) => {
+router.get("/admin-home", isAuthenticated, (req, res) => {
 
     draft_elements = "SELECT id, title, subtitle, created_at, modified_date FROM ticket WHERE publication_status = 'draft'"
     published_elements = "SELECT id, title, subtitle, created_at, modified_date, published_date FROM ticket WHERE publication_status = 'published'"
@@ -128,7 +151,7 @@ router.get("/admin-home", (req, res) => {
             published: item.published_date
         }));
 
-        res.render("admin-home.ejs", {draft, published});
+        res.render("admin-home.ejs", { draft, published }, { user: req.session.user });
     })
     .catch((err) => {
         console.error(err);
@@ -161,15 +184,15 @@ router.get("/admin-edit-product/:id", (req, res) => {
                 status: result.publication_status,
                 title: result.title,
                 subtitle: result.subtitle,
-                generalCount: result.count_general,
-                vipCount: result.count_VIP,
-                generalPrice: result.full_price, 
-                concessionPrice: result.concession_price,
+                count_general: result.count_general,
+                count_VIP: result.count_VIP,
+                full_price: result.full_price, 
+                concession_price: result.concession_price,
             };
 
             // Render the admin-edit-product.ejs template with the ticket data
             res.render('admin-edit-product.ejs', { ticket });
-            console.log('It works');
+            console.log('Moving to admin edit product page.');
         }
     });
 });
@@ -181,13 +204,15 @@ router.post("/admin-edit-product/:id", (req, res, next) => {
     console.log("Receiving data:", req.body);
 
     // Map the request body keys to the database columns
-    const elements = { title, subtitle, count_general, count_VIP, full_price, concession_price };
+    let elements = { title, subtitle, count_general, count_VIP, full_price, concession_price };
+    console.log("Elements: ", elements);
 
     let updateFields = []
     let updateValues = []
 
     // Iterate over the elements to construct dynamic fields
     for (const [key, value] of Object.entries(elements)) {
+        console.log("values going to query: ", value);
         if (value !== undefined && value !== null && value !== '') {
             updateFields.push(`${key} = ?`);
             updateValues.push(value);
@@ -200,6 +225,7 @@ router.post("/admin-edit-product/:id", (req, res, next) => {
 
     let updateTicket = `UPDATE ticket SET ${updateFields.join(", ")} WHERE id = ?`;
     
+    console.log("Update fields:", updateValues);
     console.log("Query:", updateTicket);
     console.log("Values:", updateValues);
     console.log("Completing query");
