@@ -10,25 +10,6 @@
 
 const express = require("express");
 const router = express.Router();
-const auth  = require("../index"); //import authentication func
-// const session = require("express-session");
-
-// app.use(session({
-//     secret: 'secret-key', //used to sign the session ID cookie
-//     resave: false, //don't save unmodified session
-//     saveUninitialized: false, //Don't create session until new data is stored
-//     cookie: { secure:false } //only true if using https
-// }));
-
-function isAuthenticated(req, res, next) {
-    if (req.session.user) {
-        console.log("User authenticated");
-        return next(); // User is authenticated
-    } else {
-        console.log("User not authenticated");
-      return res.redirect('/main'); // Redirect to login
-    }
-}
 
 /**
  * @desc Validate the user existence
@@ -107,7 +88,7 @@ router.get("/sign-up", (req, res) => {
 
 // });
 
-router.get("/admin-home", isAuthenticated, (req, res) => {
+router.get("/admin-home", (req, res) => {
 
     draft_elements = "SELECT id, title, subtitle, created_at, modified_date FROM ticket WHERE publication_status = 'draft'"
     published_elements = "SELECT id, title, subtitle, created_at, modified_date, published_date FROM ticket WHERE publication_status = 'published'"
@@ -151,7 +132,7 @@ router.get("/admin-home", isAuthenticated, (req, res) => {
             published: item.published_date
         }));
 
-        res.render("admin-home.ejs", { draft, published }, { user: req.session.user });
+        res.render("admin-home.ejs", { draft, published });
     })
     .catch((err) => {
         console.error(err);

@@ -7,19 +7,19 @@ BEGIN TRANSACTION;
 -- Create your tables with SQL commands here (watch out for slight syntactical differences with SQLite vs MySQL)
 
 CREATE TABLE IF NOT EXISTS users (
-    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_name TEXT NOT NULL UNIQUE,
     password CHAR(7) NOT NULL,
     role TEXT NOT NULL CHECK(role IN ('admin', 'visitor'))
 );
 
-CREATE TABLE interfaces ( 
+CREATE TABLE IF NOT EXISTS interfaces ( 
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
     description TEXT
 );
 
-CREATE TABLE user_interfaces (
+CREATE TABLE IF NOT EXISTS user_interfaces (
     user_id INTEGER,
     interface_id INTEGER,
     PRIMARY KEY (user_id, interface_id),
@@ -27,7 +27,7 @@ CREATE TABLE user_interfaces (
     FOREIGN KEY (interface_id) REFERENCES interfaces(id) ON DELETE CASCADE
 );
 
-CREATE TABLE ticket (
+CREATE TABLE IF NOT EXISTS ticket (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL UNIQUE,
     subtitle TEXT NOT NULL,
@@ -41,6 +41,19 @@ CREATE TABLE ticket (
     publication_status TEXT CHECK (publication_status IN ('published', 'draft')) DEFAULT 'draft',
     availability_status TEXT CHECK (availability_status IN ('available', 'unavailable')) DEFAULT 'available'
 );
+
+CREATE TABLE IF NOT EXISTS booked_tickets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, -- Unique identifier for the booking
+    ticket_id INTEGER NOT NULL, -- Foreign key referencing the ticket table
+    user_id INTEGER NOT NULL, -- Foreign key referencing the users table
+    booking_date DATETIME DEFAULT CURRENT_TIMESTAMP, -- Timestamp of the booking
+    ticket_type TEXT CHECK(ticket_type IN ('general', 'VIP')) NOT NULL, -- Type of ticket booked
+    quantity INTEGER NOT NULL CHECK(quantity > 0), -- Number of tickets booked
+    total_price REAL NOT NULL CHECK(total_price >= 0), -- Total price of the booked tickets
+    FOREIGN KEY (ticket_id) REFERENCES ticket (id) ON DELETE CASCADE, -- Ensures consistency with the ticket table
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE -- Ensures consistency with the users table
+);
+
 
 CREATE TRIGGER update_modified_date
 AFTER UPDATE ON ticket
@@ -75,7 +88,7 @@ END;
 -- Insert default data (if necessary here)
 
 -- Set up three users
--- INSERT INTO users ('user_name') VALUES ('Simon Star');
+INSERT INTO users ('user_name', 'password', 'role') VALUES ('admin', 'icanpass', 'admin');
 -- INSERT INTO users ('user_name') VALUES ('Dianne Dean');
 -- INSERT INTO users ('user_name') VALUES ('Harry Hilbert');
 
