@@ -20,7 +20,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>Add User</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center">
@@ -28,7 +28,7 @@
     <header class="p-4">
         <div class="text-center space-y-2">
             <div class="bg-gray-300 text-black font-bold py-2 px-4 rounded-full inline-block">BuyTickets.com</div>
-            <div class="bg-gray-300 text-black font-medium py-2 px-4 rounded-full inline-block">Sign Up</div>
+            <div class="bg-gray-300 text-black font-medium py-2 px-4 rounded-full inline-block">Add User</div>
             <div class="bg-gray-300 text-black text-sm py-2 px-4 rounded-full inline-block">By: Yarli Rabelo</div>
         </div>
     </header>
@@ -36,7 +36,7 @@
     <!-- Login Section -->
     <main class="flex-grow flex items-center justify-center">
         <div class="bg-white shadow-lg rounded-lg p-8 w-96 border">
-            <h2 class="text-2xl font-bold text-center mb-6">Sign Up</h2>
+            <h2 class="text-2xl font-bold text-center mb-6">Add User</h2>
             <form action="add-user" method="POST" class="space-y-4">
                 <!-- Username Input -->
                 <div>
@@ -47,12 +47,12 @@
                         class="w-full p-3 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     >
                 </div>
-                <!-- Password Input -->
+                <!-- Email Input -->
                 <div>
                     <input 
-                        type="password" 
-                        name="password" 
-                        placeholder="Password" 
+                        type="email" 
+                        name="email" 
+                        placeholder="Email" 
                         class="w-full p-3 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     >
                 </div>
@@ -61,7 +61,7 @@
                     <button 
                         type="submit" 
                         class="w-full bg-blue-500 text-white py-3 rounded-full font-bold hover:bg-blue-600">
-                        Sign Up
+                        Add User
                     </button>
                 </div>
             </form>
