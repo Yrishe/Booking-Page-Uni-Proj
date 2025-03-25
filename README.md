@@ -1,5 +1,4 @@
-##  Coursework Template ##
-### CM2040 Database Networks and the Web ###
+### Booking Page Uni Proj ###
 
 #### Installation requirements ####
 
