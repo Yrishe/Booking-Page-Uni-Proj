@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - EventHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#6366f1',
+                        'primary-dark': '#4f46e5',
+                        'secondary': '#ec4899',
+                        'accent': '#f59e0b',
+                        'success': '#10b981',
+                        'dark': '#1f2937'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 opacity-5">
+        <div class="text-6xl text-primary transform rotate-12 absolute top-10 left-10">🎫</div>
+        <div class="text-4xl text-secondary transform -rotate-12 absolute top-20 right-20">🎪</div>
+        <div class="text-5xl text-accent transform rotate-45 absolute bottom-20 left-20">🎭</div>
+        <div class="text-3xl text-primary transform -rotate-45 absolute bottom-10 right-10">🎨</div>
+        <div class="text-4xl text-secondary transform rotate-12 absolute top-1/2 left-1/4">🎵</div>
+        <div class="text-3xl text-accent transform -rotate-12 absolute top-1/3 right-1/3">🎬</div>
+    </div>
+
+    <!-- Header -->
+    <header class="relative z-10 bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <span class="text-2xl mr-3">🎫</span>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">EventHub</h1>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="/events" class="text-gray-700 hover:text-primary transition-colors font-medium">Events</a>
+                    <a href="/about" class="text-gray-700 hover:text-primary transition-colors font-medium">About</a>
+                    <a href="/contact" class="text-primary font-medium">Contact</a>
+                    <a href="/users/sign-in" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-colors font-medium">Sign In</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Hero Section -->
+        <div class="text-center mb-16">
+            <div class="text-6xl mb-6">📞</div>
+            <h1 class="text-4xl font-bold text-primary mb-4">Get in Touch</h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Have questions about events or need help with your booking? We're here to help!
+            </p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-12">
+            <!-- Contact Form -->
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <div class="flex items-center mb-6">
+                    <span class="text-3xl mr-4">✉️</span>
+                    <h2 class="text-2xl font-bold text-primary">Send us a Message</h2>
+                </div>
+                
+                <form action="/contact" method="POST" class="space-y-6">
+                    <!-- Name Field -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            👤 Full Name
+                        </label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                            placeholder="Enter your full name"
+                        >
+                    </div>
+
+                    <!-- Email Field -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                            📧 Email Address
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                            placeholder="Enter your email address"
+                        >
+                    </div>
+
+                    <!-- Subject Field -->
+                    <div>
+                        <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">
+                            📝 Subject
+                        </label>
+                        <select 
+                            id="subject" 
+                            name="subject" 
+                            required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                        >
+                            <option value="">Select a subject</option>
+                            <option value="general">General Inquiry</option>
+                            <option value="booking">Booking Support</option>
+                            <option value="technical">Technical Issue</option>
+                            <option value="event">Event Information</option>
+                            <option value="feedback">Feedback</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Message Field -->
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
+                            💬 Message
+                        </label>
+                        <textarea 
+                            id="message" 
+                            name="message" 
+                            rows="5" 
+                            required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors resize-none"
+                            placeholder="Tell us how we can help you..."
+                        ></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit" 
+                        class="w-full bg-primary text-white py-3 px-4 rounded-lg hover:bg-primary-dark focus:ring-4 focus:ring-purple-200 transition-all duration-200 font-medium"
+                    >
+                        Send Message 🚀
+                    </button>
+                </form>
+
+                <!-- Success/Error Messages -->
+                <% if (typeof success !== 'undefined' && success) { %>
+                    <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p class="text-green-600 text-sm text-center">✅ <%= success %></p>
+                    </div>
+                <% } %>
+                
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-red-600 text-sm text-center">⚠️ <%= error %></p>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="space-y-8">
+                <!-- Contact Details -->
+                <div class="bg-white rounded-2xl shadow-lg p-8">
+                    <div class="flex items-center mb-6">
+                        <span class="text-3xl mr-4">📍</span>
+                        <h2 class="text-2xl font-bold text-primary">Contact Information</h2>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-4 mt-1">🏢</span>
+                            <div>
+                                <h3 class="font-semibold text-gray-800 mb-1">Office Address</h3>
+                                <p class="text-gray-600">123 Event Street<br>Entertainment District<br>City, State 12345</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-4 mt-1">📞</span>
+                            <div>
+                                <h3 class="font-semibold text-gray-800 mb-1">Phone</h3>
+                                <p class="text-gray-600">+1 (555) 123-4567</p>
+                                <p class="text-sm text-gray-500">Mon-Fri, 9AM-6PM</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-4 mt-1">📧</span>
+                            <div>
+                                <h3 class="font-semibold text-gray-800 mb-1">Email</h3>
+                                <p class="text-gray-600">support@eventhub.com</p>
+                                <p class="text-sm text-gray-500">We respond within 24 hours</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <span class="text-2xl mr-4 mt-1">🕒</span>
+                            <div>
+                                <h3 class="font-semibold text-gray-800 mb-1">Business Hours</h3>
+                                <p class="text-gray-600">Monday - Friday: 9:00 AM - 6:00 PM<br>Saturday: 10:00 AM - 4:00 PM<br>Sunday: Closed</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Section -->
+                <div class="bg-white rounded-2xl shadow-lg p-8">
+                    <div class="flex items-center mb-6">
+                        <span class="text-3xl mr-4">❓</span>
+                        <h2 class="text-2xl font-bold text-primary">Quick Help</h2>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 mb-2">🎫 Booking Issues?</h3>
+                            <p class="text-gray-600 text-sm">Check your email for confirmation or contact us with your booking reference.</p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold text-gray-800 mb-2">💳 Payment Problems?</h3>
+                            <p class="text-gray-600 text-sm">Ensure your payment method is valid and has sufficient funds.</p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold text-gray-800 mb-2">📱 Technical Support?</h3>
+                            <p class="text-gray-600 text-sm">Try refreshing the page or clearing your browser cache first.</p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-semibold text-gray-800 mb-2">🎪 Event Information?</h3>
+                            <p class="text-gray-600 text-sm">Contact the event organizer directly or check the event details page.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="text-center mt-16">
+            <div class="bg-gradient-to-r from-primary to-secondary rounded-2xl p-8 text-white">
+                <h2 class="text-2xl font-bold mb-4">Need Immediate Help?</h2>
+                <p class="mb-6 opacity-90">Browse our help center or check out upcoming events while you wait for our response.</p>
+                <div class="space-x-4">
+                    <a href="/events" class="bg-white text-primary px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block">
+                        Browse Events
+                    </a>
+                    <a href="#" class="border-2 border-white text-white px-6 py-3 rounded-lg font-medium hover:bg-white hover:text-primary transition-colors inline-block">
+                        Help Center
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 bg-white mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="md:col-span-2">
+                    <div class="flex items-center mb-4">
+                        <span class="text-2xl mr-3">🎫</span>
+                        <h3 class="text-xl font-bold text-primary">EventHub</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Your premier destination for discovering and booking amazing events.</p>
+                    <div class="flex space-x-4">
+                        <span class="text-2xl">🌟</span>
+                        <span class="text-2xl">🎉</span>
+                        <span class="text-2xl">🎊</span>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a href="/events" class="hover:text-primary transition-colors">Browse Events</a></li>
+                        <li><a href="/about" class="hover:text-primary transition-colors">About Us</a></li>
+                        <li><a href="/contact" class="hover:text-primary transition-colors">Contact</a></li>
+                        <li><a href="/users/sign-in" class="hover:text-primary transition-colors">Sign In</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-4">Support</h4>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a href="#" class="hover:text-primary transition-colors">Help Center</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-primary transition-colors">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 mt-8 pt-8 text-center">
+                <p class="text-gray-500">&copy; 2024 EventHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

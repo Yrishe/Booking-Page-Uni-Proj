@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - Event Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'event-primary': '#1e40af',
+                        'event-secondary': '#3b82f6',
+                        'event-accent': '#f59e0b',
+                        'event-success': '#10b981',
+                        'event-warning': '#f59e0b',
+                        'event-error': '#ef4444'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-event-primary">🎫 EventHub</h1>
+                </div>
+                <nav class="flex items-center space-x-6">
+                    <a href="/events" class="text-gray-600 hover:text-event-primary transition-colors">Browse Events</a>
+                    <a href="/bookings" class="text-event-primary font-medium">My Bookings</a>
+                    <% if (user) { %>
+                        <span class="text-gray-600">Welcome, <%= user.user_name %></span>
+                        <a href="/logout" class="bg-event-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Logout</a>
+                    <% } else { %>
+                        <a href="/sign-in" class="bg-event-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Sign In</a>
+                    <% } %>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">My Bookings</h2>
+            <p class="text-gray-600">View and manage your event bookings</p>
+        </div>
+
+        <% if (bookings && bookings.length > 0) { %>
+            <!-- Bookings Grid -->
+            <div class="space-y-6">
+                <% bookings.forEach(booking => { %>
+                    <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                                <!-- Event Info -->
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between mb-4">
+                                        <div>
+                                            <h3 class="text-xl font-semibold text-gray-900 mb-1"><%= booking.event_title %></h3>
+                                            <p class="text-gray-600 mb-2"><%= booking.event_subtitle %></p>
+                                            <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                                <span>📅 Booked: <%= new Date(booking.booking_date).toLocaleDateString() %></span>
+                                                <% if (booking.invoice_number) { %>
+                                                    <span>📄 Invoice: #<%= booking.invoice_number %></span>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                        <!-- Status Badge -->
+                                        <div class="ml-4">
+                                            <% 
+                                                let statusClass = 'bg-gray-100 text-gray-800';
+                                                let statusText = booking.booking_status || 'pending';
+                                                if (statusText === 'confirmed') {
+                                                    statusClass = 'bg-event-success text-white';
+                                                } else if (statusText === 'cancelled') {
+                                                    statusClass = 'bg-event-error text-white';
+                                                } else if (statusText === 'pending') {
+                                                    statusClass = 'bg-event-warning text-white';
+                                                }
+                                            %>
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= statusClass %>">
+                                                <%= statusText.charAt(0).toUpperCase() + statusText.slice(1) %>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Ticket Details -->
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                        <div class="bg-gray-50 rounded-lg p-3">
+                                            <div class="text-sm text-gray-500 mb-1">Ticket Type</div>
+                                            <div class="font-medium text-gray-900">
+                                                <%= booking.ticket_type === 'general' ? '🎫 General' : '⭐ VIP' %>
+                                            </div>
+                                        </div>
+                                        <div class="bg-gray-50 rounded-lg p-3">
+                                            <div class="text-sm text-gray-500 mb-1">Quantity</div>
+                                            <div class="font-medium text-gray-900"><%= booking.quantity %> ticket<%= booking.quantity > 1 ? 's' : '' %></div>
+                                        </div>
+                                        <div class="bg-gray-50 rounded-lg p-3">
+                                            <div class="text-sm text-gray-500 mb-1">Total Paid</div>
+                                            <div class="font-medium text-gray-900">$<%= booking.total_price %></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Payment Info -->
+                                    <% if (booking.payment_method) { %>
+                                        <div class="border-t pt-4">
+                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                <div>
+                                                    <div class="text-sm text-gray-500 mb-1">Payment Method</div>
+                                                    <div class="font-medium text-gray-900">
+                                                        <%= booking.payment_method === 'card' ? '💳 Card' : '💰 ' + booking.payment_method %>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="text-sm text-gray-500 mb-1">Payment Status</div>
+                                                    <div class="font-medium text-gray-900">
+                                                        <% 
+                                                            let paymentStatusClass = 'text-gray-600';
+                                                            if (booking.payment_status === 'completed') {
+                                                                paymentStatusClass = 'text-event-success';
+                                                            } else if (booking.payment_status === 'failed') {
+                                                                paymentStatusClass = 'text-event-error';
+                                                            }
+                                                        %>
+                                                        <span class="<%= paymentStatusClass %>">
+                                                            <%= booking.payment_status ? booking.payment_status.charAt(0).toUpperCase() + booking.payment_status.slice(1) : 'Pending' %>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <% if (booking.transaction_id) { %>
+                                                    <div>
+                                                        <div class="text-sm text-gray-500 mb-1">Transaction ID</div>
+                                                        <div class="font-medium text-gray-900 text-xs"><%= booking.transaction_id %></div>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    <% } %>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="mt-4 lg:mt-0 lg:ml-6 flex flex-col space-y-2">
+                                    <% if (booking.booking_status === 'confirmed') { %>
+                                        <button class="bg-event-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                            📧 Email Ticket
+                                        </button>
+                                        <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                                            📄 Download Invoice
+                                        </button>
+                                    <% } else if (booking.booking_status === 'pending') { %>
+                                        <button class="bg-event-warning text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors text-sm">
+                                            💳 Complete Payment
+                                        </button>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <!-- Empty State -->
+            <div class="text-center py-12">
+                <div class="text-6xl mb-4">🎫</div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">No bookings yet</h3>
+                <p class="text-gray-600 mb-6">You haven't booked any events yet. Start exploring our amazing events!</p>
+                <a href="/events" class="inline-flex items-center bg-event-primary text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                    🔍 Browse Events
+                </a>
+            </div>
+        <% } %>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center text-gray-600">
+                <p>&copy; 2024 EventHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

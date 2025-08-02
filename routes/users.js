@@ -46,15 +46,45 @@ router.get("/sign-in", (req, res) => {
 router.post("/loggedIn", (req, res) => {
     const { username, password } = req.body;
 
-    checkCredentials(username, password, (err, isValid) => {
-        if(err) {
-            return res.status(500).send("An error occurred while validating credentials.");
+    if (!username || !password) {
+        return res.status(400).render('sign-in', { 
+            error: 'Username and password are required',
+            username: username || ''
+        });
+    }
+
+    const query = `SELECT id, user_name, role FROM users WHERE user_name = ? AND password = ?`;
+    
+    global.db.get(query, [username, password], (err, user) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).render('sign-in', { 
+                error: 'An error occurred while validating credentials',
+                username: username
+            });
         }
-        if (isValid) {
-            console.log("Login successful!");
-            res.redirect("/users/admin-home");
+        
+        if (user) {
+            // Store user session
+            req.session.user = {
+                id: user.id,
+                username: user.user_name,
+                role: user.role
+            };
+            
+            console.log(`Login successful for user: ${user.user_name}`);
+            
+            // Redirect based on role
+            if (user.role === 'admin') {
+                res.redirect("/users/admin-home");
+            } else {
+                res.redirect("/products/customer-sales-page-d");
+            }
         } else {
-            return res.status(401).send("Invalid username or password.");
+            return res.status(401).render('sign-in', { 
+                error: 'Invalid username or password',
+                username: username
+            });
         }
     });
 });
@@ -62,8 +92,10 @@ router.post("/loggedIn", (req, res) => {
 router.get("/logout", (req, res) => {
     req.session.destroy((err) => {
         if(err) {
+            console.error('Session destroy error:', err);
             return res.status(500).send("Error logging out.");
         }
+        res.clearCookie('connect.sid'); // Clear session cookie
         res.redirect("/main");
     });
 });
@@ -88,10 +120,15 @@ router.get("/sign-up", (req, res) => {
 
 // });
 
+// Protect admin routes
 router.get("/admin-home", (req, res) => {
+    // Check if user is authenticated and is admin
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.redirect('/users/sign-in');
+    }
 
-    draft_elements = "SELECT id, title, subtitle, created_at, modified_date FROM ticket WHERE publication_status = 'draft'"
-    published_elements = "SELECT id, title, subtitle, created_at, modified_date, published_date FROM ticket WHERE publication_status = 'published'"
+    const draft_elements = "SELECT id, title, subtitle, created_at, modified_date FROM ticket WHERE publication_status = 'draft'";
+    const published_elements = "SELECT id, title, subtitle, created_at, modified_date, published_date FROM ticket WHERE publication_status = 'published'";
 
     //Execute both queries asynchronously 
     Promise.all([
@@ -146,6 +183,10 @@ router.get("/admin-home", (req, res) => {
  * */  
 
 router.get("/admin-edit-product/:id", (req, res) => {
+    // Check if user is authenticated and is admin
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.redirect('/users/sign-in');
+    }
     // SQL query to fetch draft tickets by ID
     const draft_elements = "SELECT id, title, subtitle, count_general, count_VIP, full_price, concession_price, created_at, modified_date, publication_status FROM ticket WHERE id = ?";
     const ticketId = req.params.id; // Retrieve the ID from the URL parameters
@@ -179,6 +220,10 @@ router.get("/admin-edit-product/:id", (req, res) => {
 });
 
 router.post("/admin-edit-product/:id", (req, res, next) => {
+    // Check if user is authenticated and is admin
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.redirect('/users/sign-in');
+    }
     const ticketId = req.params.id;
     let {title, subtitle, count_general, count_VIP, full_price, concession_price} = req.body;
 
@@ -225,6 +270,10 @@ router.post("/admin-edit-product/:id", (req, res, next) => {
 });
 
 router.post("/admin-home", async (req, res, next) => {
+    // Check if user is authenticated and is admin
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.redirect('/users/sign-in');
+    }
     let { action, ticketId, title, subtitle, count_general, count_VIP, full_price, concession_price } = req.body;
     console.log("action: ", action);
     console.log(ticketId);
@@ -302,6 +351,10 @@ router.post("/admin-home", async (req, res, next) => {
 // });
 
 router.get("/list-users", (req, res, next) => {
+    // Check if user is authenticated and is admin
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.redirect('/users/sign-in');
+    }
     // Define the query
     query = "SELECT * FROM users"
 
@@ -321,6 +374,10 @@ router.get("/list-users", (req, res, next) => {
  * @desc Displays a page with a form for creating a user record
  */
 router.get("/add-user", (req, res) => {
+    // Check if user is authenticated and is admin
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.redirect('/users/sign-in');
+    }
     res.render("add-user.ejs");
 });
 
@@ -328,6 +385,10 @@ router.get("/add-user", (req, res) => {
  * @desc Add a new user to the database based on data from the submitted form
  */
 router.post("/add-user", (req, res, next) => {
+    // Check if user is authenticated and is admin
+    if (!req.session.user || req.session.user.role !== 'admin') {
+        return res.redirect('/users/sign-in');
+    }
     // Define the query
     query = "INSERT INTO users (user_name) VALUES( ? );"
     query_parameters = [req.body.user_name]

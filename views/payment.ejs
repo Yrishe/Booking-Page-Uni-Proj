@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - Library Booking Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'library-blue': '#1e40af',
+                        'library-green': '#059669',
+                        'library-gray': '#6b7280'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-library-blue">📚 Library Booking Platform</h1>
+                </div>
+                <nav class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">Welcome, <%= user.username %></span>
+                    <a href="/users/logout" class="text-sm text-red-600 hover:text-red-800">Logout</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Progress Bar -->
+        <div class="mb-8">
+            <div class="flex items-center justify-center">
+                <div class="flex items-center text-sm">
+                    <div class="flex items-center text-library-green">
+                        <div class="w-8 h-8 bg-library-green text-white rounded-full flex items-center justify-center">
+                            ✓
+                        </div>
+                        <span class="ml-2 font-medium">Event Selection</span>
+                    </div>
+                    <div class="w-16 h-0.5 bg-library-green mx-4"></div>
+                    <div class="flex items-center text-library-blue">
+                        <div class="w-8 h-8 bg-library-blue text-white rounded-full flex items-center justify-center">
+                            2
+                        </div>
+                        <span class="ml-2 font-medium">Payment</span>
+                    </div>
+                    <div class="w-16 h-0.5 bg-gray-300 mx-4"></div>
+                    <div class="flex items-center text-gray-400">
+                        <div class="w-8 h-8 bg-gray-300 text-white rounded-full flex items-center justify-center">
+                            3
+                        </div>
+                        <span class="ml-2">Confirmation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Order Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
+                    
+                    <div class="space-y-4">
+                        <div class="border-b pb-4">
+                            <h3 class="font-medium text-gray-900"><%= booking.eventTitle %></h3>
+                            <p class="text-sm text-gray-600 mt-1">
+                                <%= booking.quantity %> × <%= booking.ticket_type.charAt(0).toUpperCase() + booking.ticket_type.slice(1) %> Ticket<%= booking.quantity > 1 ? 's' : '' %>
+                            </p>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Subtotal</span>
+                                <span class="text-gray-900">$<%= (booking.total_price / 1.1).toFixed(2) %></span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Tax (10%)</span>
+                                <span class="text-gray-900">$<%= (booking.total_price - (booking.total_price / 1.1)).toFixed(2) %></span>
+                            </div>
+                            <div class="border-t pt-2">
+                                <div class="flex justify-between font-semibold">
+                                    <span class="text-gray-900">Total</span>
+                                    <span class="text-library-blue">$<%= booking.total_price.toFixed(2) %></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-6">Payment Information</h2>
+                    
+                    <% if (error) { %>
+                        <div class="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+                            <div class="flex">
+                                <div class="text-red-400">⚠️</div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-red-800"><%= error %></p>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+
+                    <form action="/products/payment/<%= booking.bookingId %>" method="POST" class="space-y-6">
+                        <!-- Payment Method -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Payment Method</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <label class="relative">
+                                    <input type="radio" name="paymentMethod" value="credit_card" class="sr-only" checked>
+                                    <div class="border-2 border-library-blue bg-library-blue bg-opacity-5 rounded-lg p-4 cursor-pointer">
+                                        <div class="flex items-center">
+                                            <div class="text-library-blue">💳</div>
+                                            <span class="ml-2 text-sm font-medium text-gray-900">Credit Card</span>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label class="relative">
+                                    <input type="radio" name="paymentMethod" value="paypal" class="sr-only">
+                                    <div class="border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-gray-300">
+                                        <div class="flex items-center">
+                                            <div class="text-blue-600">🅿️</div>
+                                            <span class="ml-2 text-sm font-medium text-gray-900">PayPal</span>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Card Information -->
+                        <div id="cardInfo" class="space-y-4">
+                            <div>
+                                <label for="cardNumber" class="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
+                                <input type="text" id="cardNumber" name="cardNumber" placeholder="1234 5678 9012 3456" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-library-blue focus:border-transparent">
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="expiryDate" class="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                                    <input type="text" id="expiryDate" name="expiryDate" placeholder="MM/YY" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-library-blue focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label for="cvv" class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                                    <input type="text" id="cvv" name="cvv" placeholder="123" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-library-blue focus:border-transparent">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Billing Address -->
+                        <div>
+                            <label for="billingAddress" class="block text-sm font-medium text-gray-700 mb-1">Billing Address</label>
+                            <textarea id="billingAddress" name="billingAddress" rows="3" placeholder="Enter your billing address" 
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-library-blue focus:border-transparent"></textarea>
+                        </div>
+
+                        <!-- Security Notice -->
+                        <div class="bg-green-50 border border-green-200 rounded-md p-4">
+                            <div class="flex">
+                                <div class="text-green-400">🔒</div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-green-800">
+                                        Your payment information is secure and encrypted. We never store your card details.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex space-x-4 pt-6">
+                            <a href="/products/customer-sales-page-d" 
+                               class="flex-1 bg-gray-200 text-gray-800 py-3 px-4 rounded-md text-center font-medium hover:bg-gray-300 transition-colors">
+                                Cancel
+                            </a>
+                            <button type="submit" 
+                                    class="flex-1 bg-library-blue text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 transition-colors">
+                                Complete Payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Payment method toggle
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const cardInfo = document.getElementById('cardInfo');
+                if (this.value === 'credit_card') {
+                    cardInfo.style.display = 'block';
+                } else {
+                    cardInfo.style.display = 'none';
+                }
+                
+                // Update visual selection
+                document.querySelectorAll('input[name="paymentMethod"]').forEach(r => {
+                    const div = r.parentElement.querySelector('div');
+                    if (r.checked) {
+                        div.className = 'border-2 border-library-blue bg-library-blue bg-opacity-5 rounded-lg p-4 cursor-pointer';
+                    } else {
+                        div.className = 'border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-gray-300';
+                    }
+                });
+            });
+        });
+
+        // Card number formatting
+        document.getElementById('cardNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formattedValue;
+        });
+
+        // Expiry date formatting
+        document.getElementById('expiryDate').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html>

@@ -50,8 +50,38 @@ CREATE TABLE IF NOT EXISTS booked_tickets (
     ticket_type TEXT CHECK(ticket_type IN ('general', 'VIP')) NOT NULL, -- Type of ticket booked
     quantity INTEGER NOT NULL CHECK(quantity > 0), -- Number of tickets booked
     total_price REAL NOT NULL CHECK(total_price >= 0), -- Total price of the booked tickets
+    booking_status TEXT CHECK(booking_status IN ('pending', 'confirmed', 'cancelled')) DEFAULT 'pending',
+    payment_id INTEGER, -- Foreign key to payments table
     FOREIGN KEY (ticket_id) REFERENCES ticket (id) ON DELETE CASCADE, -- Ensures consistency with the ticket table
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE -- Ensures consistency with the users table
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE, -- Ensures consistency with the users table
+    FOREIGN KEY (payment_id) REFERENCES payments (id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    booking_id INTEGER NOT NULL,
+    payment_method TEXT CHECK(payment_method IN ('credit_card', 'debit_card', 'paypal', 'bank_transfer')) NOT NULL,
+    payment_status TEXT CHECK(payment_status IN ('pending', 'completed', 'failed', 'refunded')) DEFAULT 'pending',
+    amount REAL NOT NULL CHECK(amount >= 0),
+    transaction_id TEXT UNIQUE,
+    payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    card_last_four TEXT, -- Last 4 digits of card for reference
+    FOREIGN KEY (booking_id) REFERENCES booked_tickets (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS invoices (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    booking_id INTEGER NOT NULL,
+    invoice_number TEXT UNIQUE NOT NULL,
+    issue_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    due_date DATETIME,
+    subtotal REAL NOT NULL CHECK(subtotal >= 0),
+    tax_amount REAL DEFAULT 0 CHECK(tax_amount >= 0),
+    total_amount REAL NOT NULL CHECK(total_amount >= 0),
+    invoice_status TEXT CHECK(invoice_status IN ('draft', 'sent', 'paid', 'overdue', 'cancelled')) DEFAULT 'draft',
+    billing_address TEXT,
+    notes TEXT,
+    FOREIGN KEY (booking_id) REFERENCES booked_tickets (id) ON DELETE CASCADE
 );
 
 
@@ -87,15 +117,18 @@ END;
 
 -- Insert default data (if necessary here)
 
--- Set up three users
-INSERT INTO users ('user_name', 'password', 'role') VALUES ('admin', 'icanpass', 'admin');
--- INSERT INTO users ('user_name') VALUES ('Dianne Dean');
--- INSERT INTO users ('user_name') VALUES ('Harry Hilbert');
+-- Set up default users
+INSERT INTO users ('user_name', 'password', 'role') VALUES ('admin', 'admin123', 'admin');
+INSERT INTO users ('user_name', 'password', 'role') VALUES ('visitor', 'visit123', 'visitor');
 
--- Give Simon two email addresses and Diane one, but Harry has none
--- INSERT INTO email_accounts ('email_address', 'user_id') VALUES ('simon@gmail.com', 1); 
--- INSERT INTO email_accounts ('email_address', 'user_id') VALUES ('simon@hotmail.com', 1); 
--- INSERT INTO email_accounts ('email_address', 'user_id') VALUES ('dianne@yahoo.co.uk', 2); 
+-- Insert sample library events/books
+INSERT INTO ticket ('title', 'subtitle', 'count_general', 'count_VIP', 'full_price', 'concession_price', 'publication_status', 'published_date') 
+VALUES 
+('Programming Workshop', 'Learn JavaScript fundamentals', 20, 5, 25.00, 15.00, 'published', '2024-01-15'),
+('Book Club Meeting', 'Discussing "Clean Code" by Robert Martin', 15, 3, 10.00, 5.00, 'published', '2024-01-20'),
+('Library Tour', 'Guided tour of our digital resources', 30, 0, 5.00, 3.00, 'published', '2024-01-25');
+-- Sample data for testing
+-- Additional users can be added through the admin interface 
 
 COMMIT;
 

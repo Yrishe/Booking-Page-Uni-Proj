@@ -5,17 +5,48 @@
 
 // Set up express, bodyparser and EJS
 const express = require("express");
+const session = require('express-session');
 const app = express();
-// const path = require("path");
-const port = 3000;
-var bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({ extended: true }));
-app.set('view engine', 'ejs'); // set the app to use ejs for rendering
+const port = process.env.PORT || 3000;
 
-//Default
-app.use(express.json())
-app.use(express.urlencoded({extended:false}))
-app.use(express.static(__dirname + '/public')); // set location of static files
+// Session configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'library-booking-secret-key-change-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // Set to true in production with HTTPS
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
+// Middleware setup
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname + '/public'));
+app.set('view engine', 'ejs');
+
+// Authentication middleware
+function requireAuth(req, res, next) {
+    if (req.session && req.session.user) {
+        return next();
+    } else {
+        return res.redirect('/users/sign-in');
+    }
+}
+
+// Admin authentication middleware
+function requireAdmin(req, res, next) {
+    if (req.session && req.session.user && req.session.user.role === 'admin') {
+        return next();
+    } else {
+        return res.status(403).send('Access denied. Admin privileges required.');
+    }
+}
+
+// Make auth middleware available globally
+app.locals.requireAuth = requireAuth;
+app.locals.requireAdmin = requireAdmin;
 
 // Set up SQLite
 // Items in the global namespace are accessible throught out the node application
@@ -31,37 +62,108 @@ global.db = new sqlite3.Database('./database.db',function(err){
 });
 
 // Handle requests to the home page 
-app.get('/main', (req, res) => {
+app.get('/', (req, res) => {
+    res.redirect('/events');
+});
 
-    queryUser = "SELECT user_name, password FROM users WHERE role = 'admin'";
-
-    const userId = req.params.id; // Retrieve the ID from the URL parameters
-
-    global.db.get(queryUser, [userId], (err, result) => {
+app.get('/events', (req, res) => {
+    const query = `
+        SELECT id, title, subtitle, published_date, count_general, count_VIP, 
+               full_price, concession_price,
+               CASE 
+                   WHEN (count_general + count_VIP) > 0 THEN 'available'
+                   ELSE 'sold_out'
+               END as availability_status
+        FROM ticket 
+        WHERE published_date IS NOT NULL
+        ORDER BY published_date DESC
+    `;
+    
+    global.db.all(query, (err, tickets) => {
         if (err) {
-            console.log(err);
-            res.status(500).send("Error fetching user data.");
-        } else if (!result) {
-            res.status(404).send("User not found.");
+            console.error('Database error:', err);
+            res.status(500).send("Error fetching events.");
         } else {
-            // Map the result to create a ticket structure for the template
-            const credentials = { username: result.user_name, password: result.password };
-
-            // Render the admin-edit-product.ejs template with the ticket data
-            res.render('main.ejs', { credentials });
-            console.log('Credential Fetched');
+            res.render('home.ejs', { 
+                tickets: tickets || [],
+                user: req.session.user || null
+            });
         }
     });
 });
 
-// Add all the route handlers in usersRoutes to the app under the path /users
-const usersRoutes = require('./routes/users');
-app.use('/users', usersRoutes);
+// Legacy route for admin credentials (keep for admin access)
+app.get('/admin-info', (req, res) => {
+    const queryUser = "SELECT user_name, password FROM users WHERE role = 'admin' LIMIT 1";
 
-// Add all the route handlers in usersRoutes to the app under the path /users
+    global.db.get(queryUser, (err, result) => {
+        if (err) {
+            console.error('Database error:', err);
+            res.status(500).send("Error fetching user data.");
+        } else {
+            const credentials = result ? 
+                { username: result.user_name, password: result.password } : 
+                { username: 'admin', password: 'admin123' };
+
+            res.render('main.ejs', { 
+                credentials,
+                user: req.session.user || null
+            });
+        }
+    });
+});
+
+// About page route
+app.get('/about', (req, res) => {
+    res.render('about', {
+        user: req.session.user || null
+    });
+});
+
+// Contact page route
+app.get('/contact', (req, res) => {
+    res.render('contact', {
+        user: req.session.user || null
+    });
+});
+
+// Contact form submission
+app.post('/contact', (req, res) => {
+    const { name, email, subject, message } = req.body;
+    
+    // In a real application, you would:
+    // 1. Validate the input
+    // 2. Send an email or save to database
+    // 3. Send confirmation email to user
+    
+    console.log('Contact form submission:', { name, email, subject, message });
+    
+    res.render('contact', {
+        user: req.session.user || null,
+        success: 'Thank you for your message! We will get back to you within 24 hours.'
+    });
+});
+
+// Add route handlers
+const usersRoutes = require('./routes/users');
 const productRoutes = require('./routes/products');
-const { Cookie } = require('express-session');
+
+app.use('/users', usersRoutes);
 app.use('/products', productRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).render('error', { 
+        message: 'Something went wrong!',
+        error: process.env.NODE_ENV === 'development' ? err : {}
+    });
+});
+
+// 404 handler
+app.use((req, res) => {
+    res.status(404).render('404', { message: 'Page not found' });
+});
 
 
 // Make the web application listen for HTTP requests

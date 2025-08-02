@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Library Booking Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'library-primary': '#2563eb',
+                        'library-secondary': '#7c3aed',
+                        'library-accent': '#06b6d4',
+                        'library-dark': '#1e293b',
+                        'library-light': '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-library-light min-h-screen">
+    <!-- Header -->
+    <header class="bg-library-primary text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="text-2xl">📚</div>
+                    <h1 class="text-xl font-bold">Library Booking Platform</h1>
+                </div>
+                <nav>
+                    <a href="/" class="text-library-accent hover:text-white transition-colors">← Back to Home</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12">
+        <div class="max-w-2xl mx-auto text-center">
+            <!-- Error Icon -->
+            <div class="text-6xl mb-6">⚠️</div>
+            
+            <!-- Error Title -->
+            <h1 class="text-3xl font-bold text-library-dark mb-4">Oops! Something went wrong</h1>
+            
+            <!-- Error Message -->
+            <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-8">
+                <p class="text-red-700 text-lg mb-2">We encountered an error while processing your request.</p>
+                <% if (typeof message !== 'undefined' && message) { %>
+                    <p class="text-red-600 text-sm font-mono bg-red-100 p-3 rounded border">
+                        <%= message %>
+                    </p>
+                <% } else { %>
+                    <p class="text-red-600 text-sm">
+                        Please try again or contact support if the problem persists.
+                    </p>
+                <% } %>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
+                <a href="/" 
+                   class="inline-block bg-library-primary text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                    🏠 Go to Home
+                </a>
+                <a href="javascript:history.back()" 
+                   class="inline-block bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors font-medium">
+                    ← Go Back
+                </a>
+            </div>
+            
+            <!-- Help Section -->
+            <div class="mt-12 p-6 bg-white rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold text-library-primary mb-4">Need Help?</h3>
+                <div class="text-gray-600 space-y-2">
+                    <p>If you continue to experience issues, please:</p>
+                    <ul class="list-disc list-inside space-y-1 text-left max-w-md mx-auto">
+                        <li>Try refreshing the page</li>
+                        <li>Clear your browser cache</li>
+                        <li>Contact our support team</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-library-primary text-white mt-16">
+        <div class="container mx-auto px-4 py-8">
+            <div class="text-center">
+                <p class="text-library-accent">
+                    © 2024 Library Booking Platform. We're here to help.
+                </p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

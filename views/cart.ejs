@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - EventHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        'primary-dark': '#4f46e5',
+                        secondary: '#f59e0b',
+                        accent: '#10b981',
+                        dark: '#1f2937',
+                        light: '#f9fafb'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-light min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-primary">EventHub</h1>
+                </div>
+                <nav class="flex space-x-8">
+                    <a href="/" class="text-gray-600 hover:text-primary transition-colors">Home</a>
+                    <% if (user) { %>
+                        <span class="text-gray-600">Welcome, <%= user.username %></span>
+                        <a href="/users/logout" class="text-gray-600 hover:text-primary transition-colors">Logout</a>
+                    <% } else { %>
+                        <a href="/users/sign-in" class="text-gray-600 hover:text-primary transition-colors">Sign In</a>
+                        <a href="/users/sign-up" class="text-gray-600 hover:text-primary transition-colors">Sign Up</a>
+                    <% } %>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-6">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h2>
+            <a href="/" class="text-primary hover:text-primary-dark transition-colors">
+                ← Back to Home
+            </a>
+        </div>
+
+        <% if (cartItems && cartItems.length > 0) { %>
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b">
+                    <h3 class="text-lg font-semibold text-gray-900">Cart Items (<%= cartItems.length %>)</h3>
+                </div>
+                
+                <div class="divide-y divide-gray-200">
+                    <% cartItems.forEach(item => { %>
+                        <div class="p-6 flex items-center justify-between">
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-1"><%= item.title %></h4>
+                                <% if (item.subtitle) { %>
+                                    <p class="text-gray-600 mb-2"><%= item.subtitle %></p>
+                                <% } %>
+                                <div class="text-sm text-gray-500 space-y-1">
+                                    <p><strong>Date:</strong> <%= new Date(item.published_date).toLocaleDateString() %></p>
+                                    <p><strong>Ticket Type:</strong> <%= item.ticket_type %></p>
+                                    <p><strong>Quantity:</strong> <%= item.quantity %></p>
+                                    <p><strong>Price per ticket:</strong> $<%= (item.total_price / item.quantity).toFixed(2) %></p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-4">
+                                <div class="text-right">
+                                    <p class="text-lg font-semibold text-gray-900">$<%= item.total_price.toFixed(2) %></p>
+                                </div>
+                                
+                                <form method="POST" action="/products/cart/remove/<%= item.id %>" class="inline">
+                                    <button type="submit" 
+                                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors"
+                                            onclick="return confirm('Are you sure you want to remove this item from your cart?')">
+                                        Remove
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+                
+                <!-- Cart Summary -->
+                <div class="px-6 py-4 bg-gray-50 border-t">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-lg font-semibold text-gray-900">Total Amount:</span>
+                        <span class="text-2xl font-bold text-primary">$<%= totalAmount.toFixed(2) %></span>
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        <a href="/" 
+                           class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 text-center py-3 px-6 rounded-md transition-colors">
+                            Continue Shopping
+                        </a>
+                        
+                        <form method="POST" action="/products/cart/checkout" class="flex-1">
+                            <button type="submit" 
+                                    class="w-full bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-md transition-colors">
+                                Proceed to Payment
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <% } else { %>
+            <!-- Empty Cart -->
+            <div class="bg-white rounded-lg shadow-md p-8 text-center">
+                <div class="mb-6">
+                    <svg class="mx-auto h-24 w-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                              d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6M17 13v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01">
+                        </path>
+                    </svg>
+                </div>
+                
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h3>
+                <p class="text-gray-600 mb-6">Looks like you haven't added any tickets to your cart yet.</p>
+                
+                <a href="/" 
+                   class="inline-block bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-md transition-colors">
+                    Browse Events
+                </a>
+            </div>
+        <% } %>
+        
+        <% if (typeof error !== 'undefined' && error === 'empty') { %>
+            <div class="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
+                <p class="text-red-800">Your cart is empty. Please add some tickets before proceeding to checkout.</p>
+            </div>
+        <% } %>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <p class="text-gray-400">&copy; 2024 EventHub. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

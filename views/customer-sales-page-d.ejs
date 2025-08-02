@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Events - Library Booking Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'library-blue': '#1e40af',
+                        'library-green': '#059669',
+                        'library-gray': '#6b7280'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-library-blue">📚 Library Booking Platform</h1>
+                </div>
+                <nav class="flex items-center space-x-4">
+                    <a href="/products/bookings" class="text-library-blue hover:text-blue-800">My Bookings</a>
+                    <% if (user) { %>
+                        <span class="text-sm text-gray-600">Welcome, <%= user.username %></span>
+                        <a href="/users/logout" class="text-sm text-red-600 hover:text-red-800">Logout</a>
+                    <% } else { %>
+                        <a href="/users/sign-in" class="text-library-blue hover:text-blue-800">Sign In</a>
+                    <% } %>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-r from-library-blue to-blue-700 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Discover Library Events</h1>
+            <p class="text-xl md:text-2xl text-blue-100 mb-8">Join workshops, lectures, and special programs at our digital library</p>
+            <div class="max-w-md mx-auto">
+                <div class="flex">
+                    <input type="text" 
+                           placeholder="Search events..." 
+                           class="flex-1 px-4 py-3 rounded-l-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                    <button class="bg-library-green hover:bg-green-700 px-6 py-3 rounded-r-lg font-medium transition-colors">
+                        🔍 Search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="bg-white border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm font-medium text-gray-700">Filter by:</span>
+                    <select class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-library-blue">
+                        <option>All Categories</option>
+                        <option>Workshops</option>
+                        <option>Lectures</option>
+                        <option>Book Clubs</option>
+                        <option>Digital Skills</option>
+                    </select>
+                    <select class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-library-blue">
+                        <option>All Dates</option>
+                        <option>This Week</option>
+                        <option>This Month</option>
+                        <option>Next Month</option>
+                    </select>
+                </div>
+                <div class="text-sm text-gray-600">
+                    <span class="font-medium"><%= tickets ? tickets.length : 0 %></span> events available
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Events Grid -->
+        <% if (tickets && tickets.length > 0) { %>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <% tickets.forEach(function(ticket) { %>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                        <!-- Event Image Placeholder -->
+                        <div class="h-48 bg-gradient-to-br from-library-blue to-blue-600 flex items-center justify-center">
+                            <div class="text-white text-6xl">
+                                <% if (ticket.title.toLowerCase().includes('workshop')) { %>
+                                    🛠️
+                                <% } else if (ticket.title.toLowerCase().includes('lecture')) { %>
+                                    🎓
+                                <% } else if (ticket.title.toLowerCase().includes('book')) { %>
+                                    📖
+                                <% } else if (ticket.title.toLowerCase().includes('digital')) { %>
+                                    💻
+                                <% } else { %>
+                                    📚
+                                <% } %>
+                            </div>
+                        </div>
+                        
+                        <!-- Event Content -->
+                        <div class="p-6">
+                            <div class="mb-4">
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">
+                                    <%= ticket.title %>
+                                </h3>
+                                <p class="text-gray-600 text-sm line-clamp-3">
+                                    <%= ticket.subtitle %>
+                                </p>
+                            </div>
+                            
+                            <!-- Event Details -->
+                            <div class="space-y-2 mb-4">
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <span class="w-4 h-4 mr-2">📅</span>
+                                    <span>Published: <%= new Date(ticket.published_date).toLocaleDateString() %></span>
+                                </div>
+                                
+                                <!-- Availability -->
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center text-sm">
+                                        <span class="w-4 h-4 mr-2">🎫</span>
+                                        <span class="text-gray-600">
+                                            <% const totalAvailable = (ticket.count_general || 0) + (ticket.count_VIP || 0) %>
+                                            <%= totalAvailable %> tickets available
+                                        </span>
+                                    </div>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        <%= ticket.availability_status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                                        <%= ticket.availability_status.charAt(0).toUpperCase() + ticket.availability_status.slice(1) %>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Pricing -->
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between text-sm">
+                                    <div>
+                                        <span class="text-gray-600">General:</span>
+                                        <span class="font-semibold text-library-blue ml-1">$<%= ticket.full_price.toFixed(2) %></span>
+                                        <% if (ticket.concession_price < ticket.full_price) { %>
+                                            <span class="text-gray-500 ml-2">Concession: $<%= ticket.concession_price.toFixed(2) %></span>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Button -->
+                            <div class="flex space-x-2">
+                                <% if (ticket.availability_status === 'available' && (ticket.count_general > 0 || ticket.count_VIP > 0)) { %>
+                                    <a href="/products/customer-checkout/<%= ticket.id %>" 
+                                       class="flex-1 bg-library-blue text-white text-center py-2 px-4 rounded-md font-medium hover:bg-blue-700 transition-colors">
+                                        🎫 Book Now
+                                    </a>
+                                <% } else { %>
+                                    <button disabled 
+                                            class="flex-1 bg-gray-300 text-gray-500 text-center py-2 px-4 rounded-md font-medium cursor-not-allowed">
+                                        Sold Out
+                                    </button>
+                                <% } %>
+                                <button class="bg-gray-100 text-gray-600 px-3 py-2 rounded-md hover:bg-gray-200 transition-colors" 
+                                        title="Add to Wishlist">
+                                    ❤️
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+            
+            <!-- Load More Button -->
+            <% if (tickets.length >= 9) { %>
+                <div class="text-center mt-12">
+                    <button class="bg-library-blue text-white px-8 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors">
+                        Load More Events
+                    </button>
+                </div>
+            <% } %>
+        <% } else { %>
+            <!-- Empty State -->
+            <div class="text-center py-16">
+                <div class="w-24 h-24 mx-auto mb-6 text-gray-300">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4v10m6-10v10m-6-4h6"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-medium text-gray-900 mb-2">No events available</h3>
+                <p class="text-gray-600 mb-6">Check back soon for new library events and programs!</p>
+                <% if (!user) { %>
+                    <a href="/users/sign-in" 
+                       class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-library-blue hover:bg-blue-700 transition-colors">
+                        Sign In to Get Notified
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+    </main>
+
+    <!-- Newsletter Section -->
+    <section class="bg-library-blue text-white py-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold mb-4">Stay Updated</h2>
+            <p class="text-xl text-blue-100 mb-8">Get notified about new events, workshops, and library programs</p>
+            <div class="max-w-md mx-auto flex">
+                <input type="email" 
+                       placeholder="Enter your email" 
+                       class="flex-1 px-4 py-3 rounded-l-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                <button class="bg-library-green hover:bg-green-700 px-6 py-3 rounded-r-lg font-medium transition-colors">
+                    Subscribe
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📚 Library Booking Platform</h3>
+                    <p class="text-gray-600 mb-4">Your gateway to digital library services, events, and educational programs. Join our community of learners and book enthusiasts.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-library-blue">📘 Facebook</a>
+                        <a href="#" class="text-gray-400 hover:text-library-blue">🐦 Twitter</a>
+                        <a href="#" class="text-gray-400 hover:text-library-blue">📷 Instagram</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-600 hover:text-library-blue">About Us</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-library-blue">Contact</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-library-blue">FAQ</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-library-blue">Support</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Services</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-600 hover:text-library-blue">Digital Library</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-library-blue">Event Booking</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-library-blue">Workshops</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-library-blue">Research Help</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-200 text-center">
+                <p class="text-gray-500 text-sm">&copy; 2024 Library Booking Platform. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('input[placeholder="Search events..."]');
+            const searchButton = searchInput?.nextElementSibling;
+            
+            if (searchButton) {
+                searchButton.addEventListener('click', function() {
+                    const query = searchInput.value.trim();
+                    if (query) {
+                        // In a real implementation, this would filter the events
+                        console.log('Searching for:', query);
+                    }
+                });
+            }
+            
+            // Newsletter subscription
+            const newsletterButton = document.querySelector('section input[type="email"] + button');
+            if (newsletterButton) {
+                newsletterButton.addEventListener('click', function() {
+                    const email = this.previousElementSibling.value.trim();
+                    if (email) {
+                        alert('Thank you for subscribing! We\'ll keep you updated.');
+                        this.previousElementSibling.value = '';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
