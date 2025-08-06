@@ -1,6 +1,8 @@
-# Library Booking Platform 📚
+# Event Booking Platform 📚
 
-A modern web application for managing library events and ticket bookings, built with Node.js, Express, and SQLite.
+<img width="4032" height="3940" alt="image" src="https://github.com/user-attachments/assets/36c834ff-0c3b-4a73-bbcc-9dd8c910ff22" />
+
+A modern web application for managing Event events and ticket bookings, built with Node.js, Express, and SQLite.
 
 ## 🌟 Features
 
@@ -10,7 +12,7 @@ A modern web application for managing library events and ticket bookings, built 
 - **User Registration**: New user sign-up functionality
 
 ### Event Management
-- **Event Creation**: Admins can create and manage library events
+- **Event Creation**: Admins can create and manage Event events
 - **Ticket Types**: Support for General and VIP ticket categories
 - **Inventory Tracking**: Real-time availability monitoring
 - **Publication Control**: Draft and published event states
@@ -90,14 +92,14 @@ After installation, test the app by browsing to:
 - `http://localhost:3000/products/customer-checkout/1` - Event booking page
 
 ### For Visitors
-1. **Browse Events**: View available library events on the homepage
+1. **Browse Events**: View available Event events on the homepage
 2. **Sign Up/Login**: Create an account or sign in to book tickets
 3. **Book Tickets**: Select events and book General or VIP tickets
 4. **Manage Bookings**: View booking history and status
 
 ### For Administrators
 1. **Admin Login**: Access admin dashboard with admin credentials
-2. **Create Events**: Add new library events with ticket allocation
+2. **Create Events**: Add new Event events with ticket allocation
 3. **Manage Users**: Oversee user accounts and permissions
 4. **View Analytics**: Monitor booking statistics and revenue
 5. **Process Payments**: Handle payment processing and invoicing
@@ -209,14 +211,6 @@ npm run build-db-win
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
-
-This project is licensed under the ISC License.
-
-## 👨‍💻 Author
-
-**Yarli Rabelo**
-
 ## 🐛 Troubleshooting
 
 ### Common Issues
@@ -253,5 +247,5 @@ This project is licensed under the ISC License.
 
 ---
 
-*Built with ❤️ for library communities*
+*Built with ❤️ for Event communities*
 
