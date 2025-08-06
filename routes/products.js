@@ -59,18 +59,18 @@ router.get("/customer-checkout/:id", requireAuth, (req, res) => {
 });
 
 router.post("/customer-checkout", requireAuth, async (req, res) => {
-    const { ticket_id, ticket_type, quantity } = req.body;
+    const { event_id, ticket_type, quantity } = req.body;
     const user_id = req.session.user.id;
     
     try {
         // Validate input
-        if (!ticket_id || !ticket_type || !quantity || quantity <= 0) {
+        if (!event_id || !ticket_type || !quantity || quantity <= 0) {
             throw new Error('Invalid booking data');
         }
         
         // Check ticket availability
         const ticket = await new Promise((resolve, reject) => {
-            global.db.get('SELECT * FROM ticket WHERE id = ?', [ticket_id], (err, row) => {
+            global.db.get('SELECT * FROM ticket WHERE id = ?', [event_id], (err, row) => {
                 if (err) reject(err);
                 else resolve(row);
             });
@@ -80,46 +80,63 @@ router.post("/customer-checkout", requireAuth, async (req, res) => {
             throw new Error('Event not found');
         }
         
-        if (ticket.availability_status !== 'available') {
-            throw new Error('Event is not available for booking');
-        }
-        
         const availableCount = ticket_type === 'general' ? ticket.count_general : ticket.count_VIP;
         if (availableCount < quantity) {
             throw new Error(`Not enough ${ticket_type} tickets available. Only ${availableCount} left.`);
         }
         
         // Calculate total price
-        const price = ticket_type === 'general' ? ticket.full_price : ticket.concession_price;
+        const price = ticket_type === 'general' ? ticket.full_price : (ticket.full_price * 1.5);
         const total_price = price * quantity;
         
-        // Create booking record
+        // Create booking record with 'confirmed' status to simulate purchase completion
         const bookingId = await new Promise((resolve, reject) => {
-            const query = `INSERT INTO booked_tickets (ticket_id, user_id, ticket_type, quantity, total_price, booking_status) VALUES (?, ?, ?, ?, ?, 'pending')`;
-            global.db.run(query, [ticket_id, user_id, ticket_type, quantity, total_price], function(err) {
+            const query = `INSERT INTO booked_tickets (ticket_id, user_id, ticket_type, quantity, total_price, booking_status) VALUES (?, ?, ?, ?, ?, 'confirmed')`;
+            global.db.run(query, [event_id, user_id, ticket_type, quantity, total_price], function(err) {
                 if (err) reject(err);
                 else resolve(this.lastID);
             });
         });
         
-        // Store booking info in session for cart
-        req.session.pendingBooking = {
-            bookingId,
-            ticket_id,
-            ticket_type,
-            quantity,
-            total_price,
-            eventTitle: ticket.title
+        // Update ticket availability to simulate purchase
+        const columnToUpdate = ticket_type === 'general' ? 'count_general' : 'count_VIP';
+        await new Promise((resolve, reject) => {
+            const query = `UPDATE ticket SET ${columnToUpdate} = ${columnToUpdate} - ? WHERE id = ?`;
+            global.db.run(query, [quantity, event_id], function(err) {
+                if (err) reject(err);
+                else resolve(this.changes);
+            });
+        });
+        
+        // Create simulated payment record
+        const paymentData = {
+            amount: total_price,
+            paymentMethod: 'credit_card',
+            cardNumber: null
         };
         
-        // Redirect to cart page
-        res.redirect(`/products/cart`);
+        const paymentResult = { success: true, transactionId: 'SIM_' + Date.now() };
+        const paymentId = await paymentProcessor.createPaymentRecord(bookingId, paymentData, paymentResult);
+        
+        // Create invoice for the completed purchase
+        const billingAddress = {
+            name: req.session.user.first_name + ' ' + req.session.user.last_name,
+            email: req.session.user.email,
+            address: 'Customer Address',
+            city: 'Customer City',
+            zipCode: '12345'
+        };
+        
+        await paymentProcessor.createInvoice(bookingId, total_price, billingAddress);
+        
+        // Redirect directly to invoice page to simulate purchase completion
+        res.redirect(`/products/invoice/${bookingId}`);
         
     } catch (err) {
         console.error('Booking error:', err);
         
         // Get event data for re-rendering the form
-        global.db.get('SELECT * FROM ticket WHERE id = ?', [ticket_id], (dbErr, ticket) => {
+        global.db.get('SELECT * FROM ticket WHERE id = ?', [event_id], (dbErr, ticket) => {
             if (dbErr || !ticket) {
                 return res.status(500).render('error', { message: 'An error occurred' });
             }
@@ -129,14 +146,10 @@ router.post("/customer-checkout", requireAuth, async (req, res) => {
                 title: ticket.title,
                 subtitle: ticket.subtitle,
                 published_date: ticket.published_date,
-                availability_status: ticket.availability_status,
                 count_general: ticket.count_general,
                 count_VIP: ticket.count_VIP,
-                ticketTypes: [
-                    { id: 'general', name: 'General Ticket', price: ticket.full_price, available: ticket.count_general },
-                    { id: 'VIP', name: 'VIP Ticket', price: ticket.concession_price, available: ticket.count_VIP }
-                ],
-                maxTicketsPerPerson: 5
+                full_price: ticket.full_price,
+                availability_status: (ticket.count_general + ticket.count_VIP) > 0 ? 'available' : 'sold out'
             };
             
             res.render('customer-checkout', {
