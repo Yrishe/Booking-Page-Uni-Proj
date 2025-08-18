@@ -2,7 +2,7 @@
 
 <img width="4032" height="3940" alt="image" src="https://github.com/user-attachments/assets/36c834ff-0c3b-4a73-bbcc-9dd8c910ff22" />
 
-A modern web application for managing Event events and ticket bookings, built with Node.js, Express, and SQLite.
+A modern web application for managing events and ticket bookings, built with Node.js, Express, and SQLite.
 
 ## 🌟 Features
 
